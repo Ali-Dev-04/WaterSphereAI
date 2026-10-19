@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MCGM Jal-Netri SCADA - Reservoirs &amp; Catchment Telemetry</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary": "#006d38",
+            "on-tertiary-fixed": "#001d31",
+            "on-primary": "#ffffff",
+            "surface-bright": "#f6f9ff",
+            "on-background": "#071d2c",
+            "on-primary-container": "#80a8d3",
+            "surface-container": "#e0f0ff",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed-variant": "#005229",
+            "on-primary-fixed": "#001d34",
+            "on-error-container": "#93000a",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed-variant": "#004b73",
+            "secondary-fixed-dim": "#71dc92",
+            "tertiary-fixed": "#cce5ff",
+            "on-tertiary": "#ffffff",
+            "on-error": "#ffffff",
+            "background": "#f6f9ff",
+            "inverse-surface": "#1e3241",
+            "surface-dim": "#c8ddf0",
+            "inverse-primary": "#a2caf7",
+            "surface-variant": "#d0e5f9",
+            "secondary-container": "#8af6a9",
+            "outline": "#72777f",
+            "on-surface": "#071d2c",
+            "on-secondary-container": "#00723b",
+            "surface-tint": "#386188",
+            "primary-fixed": "#cfe5ff",
+            "primary-container": "#0b3d62",
+            "tertiary": "#002740",
+            "surface-container-high": "#d6ebff",
+            "primary-fixed-dim": "#a2caf7",
+            "primary": "#002743",
+            "on-tertiary-container": "#4dacf1",
+            "tertiary-fixed-dim": "#93ccff",
+            "on-primary-fixed-variant": "#1d496f",
+            "surface-container-low": "#ebf5ff",
+            "secondary-fixed": "#8df9ac",
+            "error": "#ba1a1a",
+            "surface-container-highest": "#d0e5f9",
+            "surface": "#f6f9ff",
+            "on-secondary-fixed": "#00210d",
+            "outline-variant": "#c2c7cf",
+            "inverse-on-surface": "#e6f2ff",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-container": "#003e61",
+            "on-surface-variant": "#42474e"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "1.5rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-md": "0.75rem",
+            "space-lg": "1rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "label-caps": ["Inter", "sans-serif"],
+            "data-unit": ["Inter", "sans-serif"],
+            "display-telemetry-mobile": ["Inter", "sans-serif"],
+            "body-dense": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "body-default": ["Inter", "sans-serif"],
+            "display-telemetry": ["Inter", "sans-serif"],
+            "telemetry-metric": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          "fontSize": {
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "data-unit": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "display-telemetry-mobile": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-dense": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-default": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "display-telemetry": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "telemetry-metric": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Operational containment shadows matching design system */
+    .card-tier-1 {
+      background-color: #FFFFFF;
+      border: 1px solid #c8ddf0;
+      box-shadow: 0 1px 2px 0 rgba(11, 61, 98, 0.05);
+    }
+    .panel-tier-2 {
+      background-color: #FFFFFF;
+      border: 1px solid #c8ddf0;
+      box-shadow: 0 4px 6px -1px rgba(11, 61, 98, 0.08), 0 2px 4px -2px rgba(11, 61, 98, 0.04);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-default min-h-screen flex flex-col antialiased selection:bg-surface-container-high selection:text-primary">
+<!-- TOP MASTHEAD ANCHOR (Shared Component Execution: TopNavBar) -->
+<header class="bg-primary-container text-on-primary docked full-width top-0 border-b border-outline-variant shadow-md flex justify-between items-center h-14 md:h-16 px-space-xl w-full z-50 fixed top-0 left-0">
+<!-- Left: Brand Identity, Logo & Versioning -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-3">
+<img alt="MCGM Jal-Netri SCADA Logo" class="w-9 h-9 rounded-lg border border-primary-fixed/20 shadow-sm object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1VhlDjdXqBgd_kLVbEKASHku_7zUk8f52aU1BUCOEt_gUXigg12kuEJx_ET6LQWaW7A2-blqvaxI-phqZd8CBlGftCM-8J7kXM-wS7ZP5IkXbVYMEMSWS5vbbc7faoOqDmIRbq-WoQD0QmSXUxA6A4kys6KVGYjth0O_aTXH3asfITsV6vWWSOdrQO73_cIYlUz97h7pUbj4Y3u4x3BctD-Wu0FG2MM8TyMaoTTgMfgymWwzeu0tpjBnfQ"/>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md font-bold text-on-primary tracking-tight">MCGM Jal-Netri SCADA</span>
+<span class="bg-[#082C47] text-[#7DD3FC] font-mono text-[10px] px-1.5 py-0.5 rounded border border-[#1d496f]/40 font-semibold tracking-wide">bmc-v1 data</span>
+</div>
+<p class="text-label-caps font-label-caps text-on-primary-container leading-none">Water Hydraulic Operations &amp; Telemetry Grid</p>
+</div>
+</div>
+<!-- Navigation Links from JSON Anchor -->
+<nav class="hidden xl:flex items-center gap-6 ml-6 border-l border-[#1d496f] pl-6">
+<a class="text-on-primary-container hover:text-on-primary text-body-dense font-body-dense transition-colors duration-150" href="#">Live Grid</a>
+<a class="text-on-primary-container hover:text-on-primary text-body-dense font-body-dense transition-colors duration-150" href="#">Hydrology</a>
+<a class="text-on-primary border-b-2 border-secondary-fixed font-bold pb-1 text-body-dense font-body-dense" href="#">Distribution</a>
+<a class="text-on-primary-container hover:text-on-primary text-body-dense font-body-dense transition-colors duration-150 flex items-center gap-1" href="#">
+<span>Alerts</span>
+<span class="bg-error text-on-error text-[10px] px-1.5 py-0.2 rounded-full font-bold">3</span>
+</a>
+</nav>
+</div>
+<!-- Center/Right Operations Context & Role Switcher -->
+<div class="flex items-center gap-space-md">
+<!-- Role Switcher Segmented Control -->
+<div class="bg-[#082C47] p-0.5 rounded-lg flex items-center border border-[#1d496f]/60 mr-1 hidden sm:flex">
+<button class="bg-surface-container-lowest text-primary text-label-caps font-label-caps px-3 py-1 rounded shadow-sm flex items-center gap-1.5 transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Admin (All 24 Wards)</span>
+</button>
+<button class="text-[#9BB3C7] hover:text-on-primary text-label-caps font-label-caps px-3 py-1 rounded transition-colors">
+<span>Citizen (Own Ward)</span>
+</button>
+</div>
+<!-- Live SCADA Status Chip -->
+<div class="hidden lg:flex items-center gap-2 bg-[#082C47] border border-[#1d496f]/80 px-2.5 py-1 rounded-lg">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-fixed opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary-fixed"></span>
+</span>
+<span class="text-label-caps font-label-caps text-[#cfe5ff] tabular-nums">SCADA Online: 4,120 ML/d</span>
+</div>
+<!-- Emergency Trailing Protocol Button -->
+<button class="hidden md:flex items-center gap-1.5 bg-error/20 hover:bg-error/30 text-error-container border border-error/50 px-2.5 py-1 rounded text-label-caps font-label-caps transition-colors duration-150">
+<span class="material-symbols-outlined text-sm leading-none" data-icon="crisis_alert">crisis_alert</span>
+<span>Emergency Protocol</span>
+</button>
+<!-- Trailing Action Icons -->
+<div class="flex items-center border-l border-[#1d496f] pl-3 ml-1 gap-1">
+<button class="p-1.5 text-on-primary-container hover:text-on-primary hover:bg-primary transition-colors rounded-lg relative" title="Notifications">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-secondary-fixed rounded-full"></span>
+</button>
+<button class="p-1.5 text-on-primary-container hover:text-on-primary hover:bg-primary transition-colors rounded-lg" title="Sync SCADA Nodes">
+<span class="material-symbols-outlined text-[20px]" data-icon="sync">sync</span>
+</button>
+</div>
+<!-- Chief Hydrological Engineer Avatar -->
+<div class="flex items-center gap-2.5 pl-2 border-l border-[#1d496f]">
+<img alt="Er. S. Patwardhan, Chief Engineer, Hydrology - MCGM" class="w-8 h-8 rounded-full border border-primary-fixed/40 object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida/AEtjO1VC4K5ricnfLQLsaPrDwsljja49wNDw-9pJubsxLM6dwXTXX5yOoYxcpSDDk6YeFUOWEsuvStEE6n7hqZXLrooN2XFrjhOY8AuMJKcNdpCjIAtWtigSow1DocDPL-1F8E36F7VpxtHMRkBBf2tQUOYGxwFVeN0FKDKxYKZOlI7-A-UfUvId-xSAlpry8bFqQlmVqthphj6CLZ8gOxSndHSMDFiJwYL4oUpUdCcsOraQaXmDZlUt9p0jWHk"/>
+<div class="hidden 2xl:block text-left">
+<div class="text-label-caps font-label-caps text-on-primary text-[11px] leading-tight">Er. S. Patwardhan</div>
+<div class="text-[10px] text-on-primary-container font-medium">Chief Hydrologist</div>
+</div>
+</div>
+</div>
+</header>
+<!-- SUB-HEADER COMMAND STRIP (Operational Utility Strip) -->
+<div class="fixed top-14 md:top-16 left-0 right-0 h-10 bg-surface-container-lowest border-b border-surface-dim z-30 flex items-center justify-between px-space-xl">
+<!-- Breadcrumb & Ward Context Dropdown -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 text-body-dense font-body-dense text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="water_drop">water_drop</span>
+<span class="text-on-surface font-semibold">Catchment Grid</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-medium">Reservoirs &amp; Telemetry</span>
+</div>
+<div class="h-4 w-[1px] bg-surface-dim mx-1"></div>
+<!-- Ward Selector Dropdown -->
+<div class="relative">
+<button class="flex items-center gap-1.5 bg-surface-container-low hover:bg-surface-container border border-surface-dim px-2.5 py-1 rounded text-body-dense font-body-dense text-on-surface transition-colors font-medium">
+<span class="material-symbols-outlined text-[15px] text-primary" data-icon="location_on">location_on</span>
+<span>All 24 Wards (City Summary)</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="arrow_drop_down">arrow_drop_down</span>
+</button>
+</div>
+<!-- Citywide Reservoir Net Storage Pill -->
+<div class="hidden md:flex items-center gap-2 bg-[#EAF7EE] border border-[#BCE4CA] px-2.5 py-0.5 rounded-full text-label-caps font-label-caps text-secondary tabular-nums">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+<span>Citywide Storage: 84.6% · Total Draw: 3,920 ML/d</span>
+</div>
+</div>
+<!-- Date Range Picker & Instant Horizon Filters -->
+<div class="flex items-center gap-3">
+<!-- Horizon Toggles -->
+<div class="hidden sm:flex items-center bg-surface-container-low border border-surface-dim rounded p-0.5">
+<button class="bg-surface-container-lowest text-primary shadow-xs px-2.5 py-0.5 rounded text-label-caps font-label-caps font-bold">Today</button>
+<button class="text-on-surface-variant hover:text-on-surface px-2.5 py-0.5 rounded text-label-caps font-label-caps transition-colors">3-Day</button>
+<button class="text-on-surface-variant hover:text-on-surface px-2.5 py-0.5 rounded text-label-caps font-label-caps transition-colors">7-Day</button>
+<button class="text-on-surface-variant hover:text-on-surface px-2.5 py-0.5 rounded text-label-caps font-label-caps transition-colors">45-Day SCADA</button>
+</div>
+<!-- Pinned Operational Date Input -->
+<div class="flex items-center gap-1.5 bg-surface-container-lowest border border-surface-dim px-2.5 py-1 rounded text-body-dense font-body-dense text-on-surface font-mono">
+<span class="material-symbols-outlined text-[15px] text-on-surface-variant" data-icon="calendar_today">calendar_today</span>
+<span class="tabular-nums">2025-12-20</span>
+<span class="text-label-caps text-on-surface-variant font-sans text-[10px] ml-1 bg-surface-container px-1 rounded">IST 14:32</span>
+</div>
+</div>
+</div>
+<!-- PERSISTENT LEFT OPERATIONAL SIDEBAR (Shared Component Execution: SideNavBar) -->
+<aside class="fixed left-0 top-24 bottom-9 w-64 bg-surface-container-low border-r border-surface-dim flex flex-col justify-between py-space-md z-20">
+<div class="flex flex-col">
+<!-- Operational Hub Title -->
+<div class="px-4 pb-3 mb-2 border-b border-surface-dim">
+<div class="flex items-center justify-between">
+<span class="text-headline-sm font-headline-sm font-bold text-primary">Hydraulic Command</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="tune">tune</span>
+</div>
+<p class="text-body-dense font-body-dense text-on-surface-variant text-[11px]">Zone II - Sub-SCADA Realtime Hub</p>
+</div>
+<!-- Operational Navigation Links (JSON Tab Anchors + Expanded Workflow) -->
+<nav class="space-y-0.5 px-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="dashboard">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="insights">insights</span>
+<span>Forecasts</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="report_problem">report_problem</span>
+<span>Water Stress</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="schema">schema</span>
+<span>Supply Plan</span>
+</a>
+<!-- ACTIVE TAB: Reservoirs (Mandated Active Selection) -->
+<a class="border-l-4 border-primary text-primary font-bold bg-surface-container-high flex items-center justify-between px-3 py-2 rounded-r text-body-dense font-body-dense transition-all shadow-xs" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-primary" data-icon="water_damage" data-weight="fill" style="font-variation-settings: 'FILL' 1;">water_damage</span>
+<span>Reservoirs</span>
+</div>
+<span class="bg-primary text-on-primary text-[10px] px-1.5 py-0.5 rounded font-mono tabular-nums">7 Active</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="map">map</span>
+<span>GIS Map</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="speed">speed</span>
+<span>Pumping Stations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="water_ph">water_ph</span>
+<span>Water Quality</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="valve">valve</span>
+<span>Valve Control</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="plumbing">plumbing</span>
+<span>Leakage Telemetry</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container transition-colors text-body-dense font-body-dense" href="#">
+<span class="material-symbols-outlined text-[19px]" data-icon="warning">warning</span>
+<span>Incident Log</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Telemetry Feed Diagnostic Card -->
+<div class="px-3 pt-2">
+<div class="p-2.5 bg-surface-container rounded-lg border border-surface-dim">
+<div class="flex items-center gap-1.5 mb-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-label-caps font-label-caps text-primary text-[10px]">SCADA LIVE LINK</span>
+</div>
+<p class="text-body-dense font-body-dense text-on-surface font-semibold text-[11px] leading-tight mb-1">Bhandup Treatment Complex</p>
+<p class="text-[10px] text-on-surface-variant font-mono tabular-nums leading-tight">Sync latency: 240ms · 100% telemetry</p>
+</div>
+<!-- Master Link CTA from JSON -->
+<button class="w-full mt-2 bg-primary hover:bg-[#082C47] text-on-primary py-1.5 px-3 rounded text-label-caps font-label-caps flex items-center justify-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[14px]" data-icon="settings_remote">settings_remote</span>
+<span>SCADA Master Link</span>
+</button>
+</div>
+</aside>
+<!-- MAIN DASHBOARD CANVAS (Offset left by 64 / 256px, top by 24 / 96px, bottom by 36px) -->
+<main class="ml-64 mt-24 mb-9 p-space-xl flex-1 flex flex-col gap-space-lg">
+<!-- SECTION 1: RESERVOIR CONTROL & METADATA BANNER -->
+<section class="card-tier-1 rounded-xl p-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-surface-dim">
+<!-- Catchment Source Dropdown & Headline -->
+<div class="flex flex-col sm:flex-row sm:items-center gap-3">
+<div class="flex items-center gap-2.5">
+<div class="p-2 bg-surface-container rounded-lg text-primary">
+<span class="material-symbols-outlined text-[26px]" data-icon="reservoir">full_hd</span>
+</div>
+<div>
+<span class="text-label-caps font-label-caps text-on-surface-variant uppercase">Primary Reservoir Node</span>
+<div class="relative inline-block mt-0.5">
+<!-- Dropdown with all 7 MCGM Dams -->
+<select class="appearance-none bg-surface-container-lowest border border-surface-dim text-primary font-bold text-headline-sm font-headline-sm rounded-lg pl-3 pr-9 py-1 cursor-pointer focus:ring-2 focus:ring-primary focus:outline-none shadow-xs">
+<option selected="" value="bhatsa">Bhatsa Dam (976.0 MCM) - Primary Feeder</option>
+<option value="upper_vaitarna">Upper Vaitarna (331.0 MCM)</option>
+<option value="middle_vaitarna">Middle Vaitarna (202.1 MCM)</option>
+<option value="modak_sagar">Modak Sagar (128.0 MCM)</option>
+<option value="tansa">Tansa Dam (80.9 MCM)</option>
+<option value="tulsi">Tulsi Lake (11.0 MCM)</option>
+<option value="vihar">Vihar Lake (9.2 MCM)</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Status Indicator Pill -->
+<div class="sm:ml-4 inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full bg-[#EAF7EE] border border-[#BCE4CA] text-secondary text-label-caps font-label-caps">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>OPTIMAL POST-MONSOON DRAWDOWN</span>
+</div>
+</div>
+<!-- Action Control Buttons -->
+<div class="flex items-center flex-wrap gap-2">
+<button class="bg-surface-container-lowest hover:bg-surface-container-low text-on-surface border border-surface-dim px-3 py-1.5 rounded-lg text-body-dense font-body-dense font-medium flex items-center gap-1.5 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="file_download">file_download</span>
+<span>Export SCADA Timeseries (CSV)</span>
+</button>
+<button class="bg-surface-container-lowest hover:bg-surface-container-low text-on-surface border border-surface-dim px-3 py-1.5 rounded-lg text-body-dense font-body-dense font-medium flex items-center gap-1.5 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" data-icon="tune">tune</span>
+<span>Telemetry Calibrate</span>
+</button>
+<button class="bg-primary hover:bg-[#082C47] text-on-primary px-3.5 py-1.5 rounded-lg text-body-dense font-body-dense font-semibold flex items-center gap-1.5 transition-colors shadow-xs">
+<span class="material-symbols-outlined text-[16px]" data-icon="valve">valve</span>
+<span>Gate Valve Sluice Status</span>
+</button>
+</div>
+</div>
+<!-- Specific Metadata Strip -->
+<div class="pt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-body-dense font-body-dense text-on-surface-variant">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-on-surface">Catchment:</span>
+<span>Thane / Shahapur Basin</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-on-surface">Gross Capacity:</span>
+<span class="tabular-nums font-mono">976.0 MCM (976,000 ML)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-on-surface">Serviced Wards:</span>
+<span class="bg-surface-container-high px-1.5 py-0.5 rounded text-[11px] font-mono text-primary font-medium">Ward A (Colaba/Fort), Ward G/S (Worli), Ward M/E (Chembur/Govandi), Ward R/N (Dahisar)</span>
+</div>
+<div class="flex items-center gap-1.5 ml-auto">
+<span class="material-symbols-outlined text-[15px] text-secondary" data-icon="sensors">sensors</span>
+<span class="font-mono text-[11px] text-primary font-semibold">Node: #BHT-GATE-04</span>
+<span class="text-outline-variant">·</span>
+<span class="text-[11px] text-secondary font-medium">Last Telemetry: 12s ago</span>
+</div>
+</div>
+</section>
+<!-- SECTION 2: BHATSA KPI METRIC STRIP (5 High-Density Operational Cards) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-space-lg">
+<!-- Metric Card 1: Storage % -->
+<div class="card-tier-1 rounded-xl p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-label-caps font-label-caps text-on-surface-variant uppercase mb-1">
+<span>Current Storage</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="water_full">water_full</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-display-telemetry font-display-telemetry text-primary tabular-nums tracking-tight">62.4%</span>
+<span class="text-data-unit font-data-unit text-on-surface-variant">of 976 MCM</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-surface-dim flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant font-mono tabular-nums">Vol: 609,024 ML</span>
+<span class="text-secondary font-semibold">Post-Monsoon Norm</span>
+</div>
+</div>
+<!-- Metric Card 2: Live Usable Stock -->
+<div class="card-tier-1 rounded-xl p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-label-caps font-label-caps text-on-surface-variant uppercase mb-1">
+<span>Usable Live Stock</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="opacity">opacity</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-display-telemetry font-display-telemetry text-primary tabular-nums tracking-tight">584,200</span>
+<span class="text-data-unit font-data-unit text-on-surface-variant font-mono">ML Net</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-surface-dim flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant font-mono tabular-nums">Dead Baseline: 24,824 ML</span>
+<span class="text-primary font-medium font-mono tabular-nums">Draw: 1,850 ML/d</span>
+</div>
+</div>
+<!-- Metric Card 3: 60-Day Low / High Envelope -->
+<div class="card-tier-1 rounded-xl p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-label-caps font-label-caps text-on-surface-variant uppercase mb-1">
+<span>60-Day Dynamic Envelope</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="swap_vert">swap_vert</span>
+</div>
+<div class="mt-2 space-y-1">
+<div class="flex items-center justify-between text-body-dense font-body-dense">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Low (Dec 20)
+              </span>
+<span class="font-mono tabular-nums font-semibold text-primary">598,400 ML</span>
+</div>
+<div class="flex items-center justify-between text-body-dense font-body-dense">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Peak (Oct 22)
+              </span>
+<span class="font-mono tabular-nums font-semibold text-secondary">968,200 ML</span>
+</div>
+</div>
+</div>
+<div class="mt-2 pt-2 border-t border-surface-dim text-[11px] text-on-surface-variant font-mono">
+          Controlled release gradient
+        </div>
+</div>
+<!-- Metric Card 4: Autonomous Supply Buffer -->
+<div class="card-tier-1 rounded-xl p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-label-caps font-label-caps text-on-surface-variant uppercase mb-1">
+<span>Autonomous Buffer</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="hourglass_top">hourglass_top</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-display-telemetry font-display-telemetry text-primary tabular-nums tracking-tight">316</span>
+<span class="text-data-unit font-data-unit text-on-surface-variant">Days Supply</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-surface-dim flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant">Bhatsa Trunk Rate</span>
+<span class="text-secondary font-bold font-mono">Surplus to Monsoon</span>
+</div>
+</div>
+<!-- Metric Card 5: Sensor Health & Spillway -->
+<div class="card-tier-1 rounded-xl p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-label-caps font-label-caps text-on-surface-variant uppercase mb-1">
+<span>Sensor &amp; Spillway</span>
+<span class="material-symbols-outlined text-secondary text-[18px]" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="text-headline-lg font-headline-lg text-primary tabular-nums">138.4m</span>
+<span class="text-data-unit font-data-unit text-on-surface-variant">MSL (FSL: 142.0m)</span>
+</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-surface-dim flex items-center justify-between text-[11px]">
+<span class="text-on-surface-variant font-mono">Inflow: 42 ML/d</span>
+<span class="inline-flex items-center gap-1 text-secondary font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>Normal Gate
+          </span>
+</div>
+</div>
+</section>
+<!-- SECTION 3: LARGE DUAL-AXIS 60-DAY TELEMETRY CHART (Oct 22 - Dec 20, 2025) -->
+<section class="card-tier-1 rounded-xl p-space-lg flex flex-col gap-4">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-headline-sm font-headline-sm text-primary font-bold">60-Day Storage Ratio (%) vs Available Usable Volume (ML)</span>
+<span class="bg-surface-container text-primary font-mono text-[10px] px-2 py-0.5 rounded font-semibold">Bhatsa Master HydroSCADA Node</span>
+</div>
+<p class="text-body-dense font-body-dense text-on-surface-variant mt-0.5">
+            Continuous SCADA ultrasonic level transducer readings and sonic flow metering. Monsoon recharge peak in late October followed by regulated winter dry-season drawdown.
+          </p>
+</div>
+<!-- Legend / Axis Identity Indicators -->
+<div class="flex items-center gap-5 bg-surface-container-low px-3 py-1.5 rounded-lg border border-surface-dim text-[11px]">
+<div class="flex items-center gap-2">
+<div class="w-3.5 h-1 rounded-full bg-primary-container"></div>
+<span class="font-semibold text-primary">Storage Ratio (Left Axis %)</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3.5 h-1 rounded-full bg-[#0284c7]"></div>
+<span class="font-semibold text-[#0284c7]">Usable Volume (Right Axis ML)</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<div class="w-3 border-b-2 border-dashed border-[#ba1a1a]"></div>
+<span class="text-[10px]">Rule Curve (35%)</span>
+</div>
+</div>
+</div>
+<!-- High-Density Telemetry SVG Visualization Canvas -->
+<div class="w-full bg-surface-container-lowest border border-surface-dim rounded-lg p-4 relative overflow-hidden">
+<!-- Dual Y-Axis Indicators & Grid -->
+<div class="relative w-full h-[320px]">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 1000 320">
+<defs>
+<!-- Subtle Translucent Volume Gradient Fill -->
+<lineargradient id="volumeGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0284c7" stop-opacity="0.18"></stop>
+<stop offset="100%" stop-color="#0284c7" stop-opacity="0.01"></stop>
+</lineargradient>
+<lineargradient id="storageGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0b3d62" stop-opacity="0.12"></stop>
+<stop offset="100%" stop-color="#0b3d62" stop-opacity="0.00"></stop>
+</lineargradient>
+</defs>
+<!-- Horizontal Grid lines corresponding to 0%, 25%, 50%, 75%, 100% -->
+<!-- 100% / 1000k ML at y=25 -->
+<line stroke="#e0f0ff" stroke-width="1" x1="50" x2="950" y1="25" y2="25"></line>
+<!-- 75% / 750k ML at y=90 -->
+<line stroke="#e0f0ff" stroke-width="1" x1="50" x2="950" y1="90" y2="90"></line>
+<!-- 50% / 500k ML at y=155 -->
+<line stroke="#e0f0ff" stroke-width="1" x1="50" x2="950" y1="155" y2="155"></line>
+<!-- 25% / 250k ML at y=220 -->
+<line stroke="#e0f0ff" stroke-width="1" x1="50" x2="950" y1="220" y2="220"></line>
+<!-- 0% / 0 ML at y=285 -->
+<line stroke="#c8ddf0" stroke-width="1.5" x1="50" x2="950" y1="285" y2="285"></line>
+<!-- Critical Threshold Warning Rule Curve (35% at y=194) -->
+<line opacity="0.75" stroke="#ba1a1a" stroke-dasharray="4 4" stroke-width="1.2" x1="50" x2="950" y1="194" y2="194"></line>
+<text fill="#ba1a1a" font-family="Inter" font-size="9" font-weight="600" x="55" y="190">CRITICAL SEASONAL RULE CURVE (35% / 341,600 ML)</text>
+<!-- Full Supply Level (FSL 142.0m) dashed line at y=30 -->
+<line opacity="0.6" stroke="#006d38" stroke-dasharray="3 3" stroke-width="1" x1="50" x2="950" y1="30" y2="30"></line>
+<text fill="#006d38" font-family="Inter" font-size="9" font-weight="600" x="800" y="22">FSL SPILLWAY CREST: 142.0m MSL</text>
+<!-- Translucent Area Fill Under Telemetry Volume Line -->
+<!-- Path from Oct 22 (x=80, y=33) down to Dec 20 (x=920, y=123) -->
+<path d="M 80 33 
+                     C 180 38, 260 48, 350 62 
+                     C 440 76, 530 90, 620 102 
+                     C 710 112, 820 120, 920 123 
+                     L 920 285 L 80 285 Z" fill="url(#volumeGradient)"></path>
+<!-- Cyan Line: Usable Live Volume (968k ML -> 609k ML) -->
+<path d="M 80 33 
+                     C 180 38, 260 48, 350 62 
+                     C 440 76, 530 90, 620 102 
+                     C 710 112, 820 120, 920 123" fill="none" stroke="#0284c7" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Dark Navy Line: Storage Capacity % (99.2% -> 62.4%) -->
+<path d="M 80 27 
+                     C 180 32, 260 44, 350 58 
+                     C 440 72, 530 86, 620 98 
+                     C 710 109, 820 119, 920 122.8" fill="none" stroke="#0b3d62" stroke-linecap="round" stroke-width="2"></path>
+<!-- Telemetry Data Nodes with Markers -->
+<!-- Node 1: Oct 22 (Peak) -->
+<circle cx="80" cy="27" fill="#0b3d62" r="4" stroke="#ffffff" stroke-width="1.5"></circle>
+<circle cx="80" cy="33" fill="#0284c7" r="3.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<text fill="#071d2c" font-family="Inter" font-size="10" font-weight="700" text-anchor="middle" x="80" y="16">99.2% (968k ML)</text>
+<!-- Node 2: Nov 05 -->
+<circle cx="280" cy="51" fill="#0b3d62" r="3"></circle>
+<!-- Node 3: Nov 19 -->
+<circle cx="480" cy="80" fill="#0b3d62" r="3"></circle>
+<!-- Node 4: Dec 03 -->
+<circle cx="680" cy="108" fill="#0b3d62" r="3"></circle>
+<!-- Node 5: Dec 15 -->
+<circle cx="840" cy="119" fill="#0b3d62" r="3"></circle>
+<!-- Node 6: Dec 20 (Today) -->
+<circle cx="920" cy="122.8" fill="#0b3d62" r="5" stroke="#ffffff" stroke-width="2"></circle>
+<circle cx="920" cy="123" fill="#0284c7" r="3.5" stroke="#ffffff" stroke-width="1.5"></circle>
+<!-- Value Annotation Pin for Dec 20 -->
+<rect fill="#071d2c" height="34" rx="4" width="115" x="830" y="135"></rect>
+<text fill="#ffffff" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle" x="887" y="148">Today: 62.4%</text>
+<text fill="#7DD3FC" font-family="JetBrains Mono" font-size="9" text-anchor="middle" x="887" y="161">609,024 ML Active</text>
+<!-- Left Y-Axis Labels (Storage %) -->
+<text fill="#42474e" font-family="Inter" font-size="10" font-weight="600" text-anchor="end" x="42" y="28">100%</text>
+<text fill="#42474e" font-family="Inter" font-size="10" font-weight="500" text-anchor="end" x="42" y="93">75%</text>
+<text fill="#42474e" font-family="Inter" font-size="10" font-weight="500" text-anchor="end" x="42" y="158">50%</text>
+<text fill="#42474e" font-family="Inter" font-size="10" font-weight="500" text-anchor="end" x="42" y="223">25%</text>
+<text fill="#42474e" font-family="Inter" font-size="10" font-weight="500" text-anchor="end" x="42" y="288">0%</text>
+<!-- Right Y-Axis Labels (Usable Volume in ML) -->
+<text fill="#0284c7" font-family="JetBrains Mono" font-size="10" font-weight="600" text-anchor="start" x="958" y="28">1,000k ML</text>
+<text fill="#0284c7" font-family="JetBrains Mono" font-size="10" font-weight="500" text-anchor="start" x="958" y="93">750k ML</text>
+<text fill="#0284c7" font-family="JetBrains Mono" font-size="10" font-weight="500" text-anchor="start" x="958" y="158">500k ML</text>
+<text fill="#0284c7" font-family="JetBrains Mono" font-size="10" font-weight="500" text-anchor="start" x="958" y="223">250k ML</text>
+<text fill="#0284c7" font-family="JetBrains Mono" font-size="10" font-weight="500" text-anchor="start" x="958" y="288">0 ML</text>
+<!-- X-Axis Date Ticks -->
+<text fill="#42474e" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle" x="80" y="306">Oct 22 (Peak)</text>
+<text fill="#72777f" font-family="Inter" font-size="10" text-anchor="middle" x="280" y="306">Nov 05</text>
+<text fill="#72777f" font-family="Inter" font-size="10" text-anchor="middle" x="480" y="306">Nov 19</text>
+<text fill="#72777f" font-family="Inter" font-size="10" text-anchor="middle" x="680" y="306">Dec 03</text>
+<text fill="#72777f" font-family="Inter" font-size="10" text-anchor="middle" x="840" y="306">Dec 15</text>
+<text fill="#071d2c" font-family="Inter" font-size="10" font-weight="700" text-anchor="middle" x="920" y="306">Dec 20 (Today)</text>
+</svg>
+</div>
+<!-- Technical Telemetry Footer Caption -->
+<div class="mt-2 pt-2 border-t border-surface-dim flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] text-on-surface-variant font-mono">
+<div>
+<span>Model: MCGM HydroSCADA v2.1 · API: </span>
+<code class="text-primary bg-surface-container px-1 py-0.5 rounded">GET /api/reservoir?reservoir_id=bhatsa&amp;date_from=2025-10-22&amp;date_to=2025-12-20</code>
+</div>
+<div class="flex items-center gap-3">
+<span>Y-axes start at 0 for volumes</span>
+<span class="bg-[#082C47] text-[#7DD3FC] px-1.5 py-0.2 rounded font-semibold">bmc-v1 data</span>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: 7-RESERVOIR SOURCE COMPARISON TABLE -->
+<section class="card-tier-1 rounded-xl p-space-lg flex flex-col gap-4">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-headline-sm font-headline-sm text-primary font-bold">MCGM 7 Catchment Source Comparison</h3>
+<span class="bg-[#EAF7EE] text-secondary border border-[#BCE4CA] text-label-caps font-label-caps px-2 py-0.5 rounded-full">All Nodes Live</span>
+</div>
+<p class="text-body-dense font-body-dense text-on-surface-variant">Realtime telemetry comparison across all seven dam sources supplying the Greater Mumbai distribution grid.</p>
+</div>
+<!-- Filter & Search Controls -->
+<div class="flex items-center gap-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" data-icon="search">search</span>
+<input class="bg-surface-container-low border border-surface-dim rounded-lg pl-8 pr-3 py-1.5 text-body-dense font-body-dense text-on-surface focus:outline-none focus:ring-1 focus:ring-primary w-48 sm:w-64" placeholder="Filter reservoir or ward..." type="text"/>
+</div>
+<button class="bg-surface-container-low hover:bg-surface-container border border-surface-dim px-3 py-1.5 rounded-lg text-body-dense font-body-dense font-medium text-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="filter_list">filter_list</span>
+<span>Sort</span>
+</button>
+</div>
+</div>
+<!-- Tabular Grid -->
+<div class="overflow-x-auto rounded-lg border border-surface-dim">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 border-b border-surface-dim text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider text-[11px] h-9">
+<th class="px-4 py-2 font-semibold">Catchment Reservoir</th>
+<th class="px-3 py-2 font-semibold text-right">Gross Cap (MCM)</th>
+<th class="px-3 py-2 font-semibold text-right">Storage %</th>
+<th class="px-3 py-2 font-semibold text-right">Metered Vol (ML)</th>
+<th class="px-3 py-2 font-semibold">Primary Serviced Wards</th>
+<th class="px-3 py-2 font-semibold">Telemetry Status</th>
+<th class="px-3 py-2 font-semibold text-right">Current Draw</th>
+<th class="px-3 py-2 font-semibold text-right">Daily Inflow</th>
+<th class="px-3 py-2 font-semibold text-center">Node</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-dim text-body-dense font-body-dense tabular-nums">
+<!-- Row 1: Bhatsa -->
+<tr class="hover:bg-surface-container-low/60 transition-colors bg-surface-container-high/20">
+<td class="px-4 py-2.5 font-semibold text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Bhatsa</span>
+<span class="bg-primary-container text-on-primary font-mono text-[9px] px-1 rounded font-normal">Primary</span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono font-medium">976.0</td>
+<td class="px-3 py-2.5 text-right font-bold text-primary">62.4%</td>
+<td class="px-3 py-2.5 text-right font-mono font-semibold text-primary">609,024</td>
+<td class="px-3 py-2.5 font-sans">
+<div class="flex flex-wrap gap-1">
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">A</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">G/S</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">M/E</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">R/N</span>
+</div>
+</td>
+<td class="px-3 py-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B]"></span>Safe / Normal
+                </span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono text-on-surface">1,850 ML/d</td>
+<td class="px-3 py-2.5 text-right font-mono text-secondary">42 ML/d</td>
+<td class="px-3 py-2.5 text-center">
+<button class="text-primary hover:bg-surface-container px-2 py-1 rounded text-[11px] font-medium border border-surface-dim transition-colors">View Node</button>
+</td>
+</tr>
+<!-- Row 2: Upper Vaitarna -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="px-4 py-2.5 font-semibold text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Upper Vaitarna</span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono font-medium">331.0</td>
+<td class="px-3 py-2.5 text-right font-bold text-primary">64.8%</td>
+<td class="px-3 py-2.5 text-right font-mono font-semibold text-primary">214,488</td>
+<td class="px-3 py-2.5 font-sans">
+<div class="flex flex-wrap gap-1">
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">E</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">K/E</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">P/N</span>
+</div>
+</td>
+<td class="px-3 py-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B]"></span>Safe / Normal
+                </span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono text-on-surface">720 ML/d</td>
+<td class="px-3 py-2.5 text-right font-mono text-secondary">18 ML/d</td>
+<td class="px-3 py-2.5 text-center">
+<button class="text-primary hover:bg-surface-container px-2 py-1 rounded text-[11px] font-medium border border-surface-dim transition-colors">View Node</button>
+</td>
+</tr>
+<!-- Row 3: Middle Vaitarna -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="px-4 py-2.5 font-semibold text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#C9A100]"></span>
+<span>Middle Vaitarna</span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono font-medium">202.1</td>
+<td class="px-3 py-2.5 text-right font-bold text-primary">58.2%</td>
+<td class="px-3 py-2.5 text-right font-mono font-semibold text-primary">117,622</td>
+<td class="px-3 py-2.5 font-sans">
+<div class="flex flex-wrap gap-1">
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">D</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">H/W</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">P/S</span>
+</div>
+</td>
+<td class="px-3 py-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#FDF8E6] text-[#C9A100] border border-[#F4E299]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C9A100]"></span>Moderate
+                </span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono text-on-surface">480 ML/d</td>
+<td class="px-3 py-2.5 text-right font-mono text-secondary">12 ML/d</td>
+<td class="px-3 py-2.5 text-center">
+<button class="text-primary hover:bg-surface-container px-2 py-1 rounded text-[11px] font-medium border border-surface-dim transition-colors">View Node</button>
+</td>
+</tr>
+<!-- Row 4: Modak Sagar -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="px-4 py-2.5 font-semibold text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Modak Sagar</span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono font-medium">128.0</td>
+<td class="px-3 py-2.5 text-right font-bold text-primary">61.0%</td>
+<td class="px-3 py-2.5 text-right font-mono font-semibold text-primary">78,080</td>
+<td class="px-3 py-2.5 font-sans">
+<div class="flex flex-wrap gap-1">
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">C</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">H/E</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">N</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">T</span>
+</div>
+</td>
+<td class="px-3 py-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B]"></span>Safe / Normal
+                </span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono text-on-surface">440 ML/d</td>
+<td class="px-3 py-2.5 text-right font-mono text-secondary">8 ML/d</td>
+<td class="px-3 py-2.5 text-center">
+<button class="text-primary hover:bg-surface-container px-2 py-1 rounded text-[11px] font-medium border border-surface-dim transition-colors">View Node</button>
+</td>
+</tr>
+<!-- Row 5: Tansa -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="px-4 py-2.5 font-semibold text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#C9A100]"></span>
+<span>Tansa</span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono font-medium">80.9</td>
+<td class="px-3 py-2.5 text-right font-bold text-primary">55.4%</td>
+<td class="px-3 py-2.5 text-right font-mono font-semibold text-primary">44,818</td>
+<td class="px-3 py-2.5 font-sans">
+<div class="flex flex-wrap gap-1">
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">B</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">G/N</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">M/W</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">S</span>
+</div>
+</td>
+<td class="px-3 py-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#FDF8E6] text-[#C9A100] border border-[#F4E299]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C9A100]"></span>Moderate
+                </span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono text-on-surface">220 ML/d</td>
+<td class="px-3 py-2.5 text-right font-mono text-secondary">5 ML/d</td>
+<td class="px-3 py-2.5 text-center">
+<button class="text-primary hover:bg-surface-container px-2 py-1 rounded text-[11px] font-medium border border-surface-dim transition-colors">View Node</button>
+</td>
+</tr>
+<!-- Row 6: Tulsi -->
+<tr class="hover:bg-surface-container-low/60 transition-colors">
+<td class="px-4 py-2.5 font-semibold text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#C9A100]"></span>
+<span>Tulsi</span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono font-medium">11.0</td>
+<td class="px-3 py-2.5 text-right font-bold text-primary">52.8%</td>
+<td class="px-3 py-2.5 text-right font-mono font-semibold text-primary">5,808</td>
+<td class="px-3 py-2.5 font-sans">
+<div class="flex flex-wrap gap-1">
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">F/N</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">L</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">R/C</span>
+</div>
+</td>
+<td class="px-3 py-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#FDF8E6] text-[#C9A100] border border-[#F4E299]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C9A100]"></span>Moderate
+                </span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono text-on-surface">30 ML/d</td>
+<td class="px-3 py-2.5 text-right font-mono text-secondary">1 ML/d</td>
+<td class="px-3 py-2.5 text-center">
+<button class="text-primary hover:bg-surface-container px-2 py-1 rounded text-[11px] font-medium border border-surface-dim transition-colors">View Node</button>
+</td>
+</tr>
+<!-- Row 7: Vihar -->
+<tr class="hover:bg-surface-container-low/60 transition-colors bg-[#FBEEEE]/30">
+<td class="px-4 py-2.5 font-semibold text-primary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#E07B00]"></span>
+<span>Vihar</span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono font-medium">9.2</td>
+<td class="px-3 py-2.5 text-right font-bold text-[#E07B00]">48.6%</td>
+<td class="px-3 py-2.5 text-right font-mono font-semibold text-primary">4,471</td>
+<td class="px-3 py-2.5 font-sans">
+<div class="flex flex-wrap gap-1">
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">F/S</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">K/W</span>
+<span class="bg-surface-container px-1.5 py-0.5 rounded text-[10px] text-primary font-medium">R/S</span>
+</div>
+</td>
+<td class="px-3 py-2.5">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#FCF2E6] text-[#E07B00] border border-[#F9D3A8]" title="Below 50% seasonal rule curve">
+<span class="w-1.5 h-1.5 rounded-full bg-[#E07B00]"></span>High Stress (&lt;50%)
+                </span>
+</td>
+<td class="px-3 py-2.5 text-right font-mono text-on-surface">70 ML/d</td>
+<td class="px-3 py-2.5 text-right font-mono text-secondary">0.8 ML/d</td>
+<td class="px-3 py-2.5 text-center">
+<button class="text-primary hover:bg-surface-container px-2 py-1 rounded text-[11px] font-medium border border-surface-dim transition-colors">View Node</button>
+</td>
+</tr>
+</tbody>
+<!-- Aggregated Summary Total Footer Row -->
+<tfoot>
+<tr class="bg-surface-container-high/40 border-t-2 border-surface-dim text-body-dense font-body-dense font-bold text-primary">
+<td class="px-4 py-3">Total 7 Dams Summary</td>
+<td class="px-3 py-3 text-right font-mono">1,738.2 MCM</td>
+<td class="px-3 py-3 text-right text-secondary">61.8% Net</td>
+<td class="px-3 py-3 text-right font-mono">1,074,311 ML</td>
+<td class="px-3 py-3 font-sans font-medium text-[11px] text-on-surface-variant">All 24 BMC Wards Covered</td>
+<td class="px-3 py-3">
+<span class="inline-flex items-center gap-1 text-[11px] text-secondary">
+<span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>Grid Balance Stable
+                </span>
+</td>
+<td class="px-3 py-3 text-right font-mono text-primary">3,810 ML/d</td>
+<td class="px-3 py-3 text-right font-mono text-secondary">86.8 ML/d</td>
+<td class="px-3 py-3 text-center text-[10px] font-mono font-normal text-on-surface-variant">SCADA SYNC</td>
+</tr>
+</tfoot>
+</table>
+</div>
+</section>
+</main>
+<!-- BOTTOM MUNICIPAL FOOTER (Docked SCADA Compliance Strip) -->
+<footer class="fixed bottom-0 left-0 right-0 h-9 bg-surface-container-lowest border-t border-surface-dim z-30 flex items-center justify-between px-space-xl text-[11px] text-on-surface-variant font-mono">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 font-semibold text-primary font-sans">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Municipal Corporation of Greater Mumbai (MCGM) Water Hydraulic Operations &amp; SCADA Control Room</span>
+</span>
+<span class="text-surface-dim">|</span>
+<span class="text-error font-medium">Emergency Hotline 1916</span>
+<span class="text-surface-dim">|</span>
+<span>Version bmc-v1.4.2</span>
+</div>
+<div class="hidden md:flex items-center gap-4">
+<span class="bg-surface-container px-2 py-0.5 rounded text-primary text-[10px]">ISO 9001:2015</span>
+<span class="bg-surface-container px-2 py-0.5 rounded text-primary text-[10px]">Protocol: IEC 60870-5-104</span>
+<span class="text-secondary font-sans font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]" data-icon="lock">lock</span> Encrypted SCADA Uplink
+      </span>
+</div>
+</footer>
+</body></html>

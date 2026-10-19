@@ -1,0 +1,42 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: watersphere
+          POSTGRES_PASSWORD: devpass
+          POSTGRES_DB: watersphere
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U watersphere"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r backend/requirements.txt -r requirements.txt pytest
+      - run: alembic upgrade head
+        env: { DATABASE_URL: postgresql+psycopg2://watersphere:devpass@localhost:5433/watersphere }
+      - run: python backend/seed.py
+        env: { DATABASE_URL: postgresql+psycopg2://watersphere:devpass@localhost:5433/watersphere }
+      - run: PYTHONPATH=backend python -m pytest backend/tests -q
+        env: { DATABASE_URL: postgresql+psycopg2://watersphere:devpass@localhost:5433/watersphere }
+  ml-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: python scripts/validate_data.py && python scripts/preprocess.py && python scripts/features.py
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: cd frontend && npm ci && npm run build

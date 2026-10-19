@@ -1,0 +1,7 @@
+bmc-v1 (BMC Mumbai modelling dataset, converted 2026-10-05)
+source: WaterSphere_BMC_Mumbai_D1_D7/ via scripts/convert_bmc_data.py
+grain: ward-daily 2023-01-01..2025-12-31, 24 wards, 7 reservoirs
+rows: consumption 26304, readings 7672, population 72, maintenance 123 incidents
+license: synthetic modelling assignment — labeled PoC, NOT production-validated
+replaces: synthetic-v1 (seed 42, 5 wards W001-W005, 2024-2025) — fully superseded
+notes: reservoir serving map + level_m placeholder per data_dictionary.md; GIS approximate-centroid

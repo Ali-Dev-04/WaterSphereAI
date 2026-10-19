@@ -1,0 +1,821 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "A",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.81,
+              18.9
+            ],
+            [
+              72.85,
+              18.9
+            ],
+            [
+              72.85,
+              18.94
+            ],
+            [
+              72.81,
+              18.94
+            ],
+            [
+              72.81,
+              18.9
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "B",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.82,
+              18.94
+            ],
+            [
+              72.86,
+              18.94
+            ],
+            [
+              72.86,
+              18.98
+            ],
+            [
+              72.82,
+              18.98
+            ],
+            [
+              72.82,
+              18.94
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "C",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.8,
+              18.93
+            ],
+            [
+              72.84,
+              18.93
+            ],
+            [
+              72.84,
+              18.97
+            ],
+            [
+              72.8,
+              18.97
+            ],
+            [
+              72.8,
+              18.93
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "D",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.79,
+              18.94
+            ],
+            [
+              72.83,
+              18.94
+            ],
+            [
+              72.83,
+              18.98
+            ],
+            [
+              72.79,
+              18.98
+            ],
+            [
+              72.79,
+              18.94
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "E",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.82,
+              18.96
+            ],
+            [
+              72.86,
+              18.96
+            ],
+            [
+              72.86,
+              19.0
+            ],
+            [
+              72.82,
+              19.0
+            ],
+            [
+              72.82,
+              18.96
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "F/N",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.84,
+              19.01
+            ],
+            [
+              72.88,
+              19.01
+            ],
+            [
+              72.88,
+              19.05
+            ],
+            [
+              72.84,
+              19.05
+            ],
+            [
+              72.84,
+              19.01
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "F/S",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.83,
+              18.98
+            ],
+            [
+              72.87,
+              18.98
+            ],
+            [
+              72.87,
+              19.02
+            ],
+            [
+              72.83,
+              19.02
+            ],
+            [
+              72.83,
+              18.98
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "G/N",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.82,
+              19.02
+            ],
+            [
+              72.86,
+              19.02
+            ],
+            [
+              72.86,
+              19.06
+            ],
+            [
+              72.82,
+              19.06
+            ],
+            [
+              72.82,
+              19.02
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "G/S",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.8,
+              18.97
+            ],
+            [
+              72.84,
+              18.97
+            ],
+            [
+              72.84,
+              19.01
+            ],
+            [
+              72.8,
+              19.01
+            ],
+            [
+              72.8,
+              18.97
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "H/E",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.83,
+              19.04
+            ],
+            [
+              72.87,
+              19.04
+            ],
+            [
+              72.87,
+              19.08
+            ],
+            [
+              72.83,
+              19.08
+            ],
+            [
+              72.83,
+              19.04
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "H/W",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.81,
+              19.05
+            ],
+            [
+              72.85,
+              19.05
+            ],
+            [
+              72.85,
+              19.09
+            ],
+            [
+              72.81,
+              19.09
+            ],
+            [
+              72.81,
+              19.05
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "K/E",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.85,
+              19.1
+            ],
+            [
+              72.89,
+              19.1
+            ],
+            [
+              72.89,
+              19.14
+            ],
+            [
+              72.85,
+              19.14
+            ],
+            [
+              72.85,
+              19.1
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "K/W",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.8,
+              19.11
+            ],
+            [
+              72.84,
+              19.11
+            ],
+            [
+              72.84,
+              19.15
+            ],
+            [
+              72.8,
+              19.15
+            ],
+            [
+              72.8,
+              19.11
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "L",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.86,
+              19.05
+            ],
+            [
+              72.9,
+              19.05
+            ],
+            [
+              72.9,
+              19.09
+            ],
+            [
+              72.86,
+              19.09
+            ],
+            [
+              72.86,
+              19.05
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "M/E",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.9,
+              19.03
+            ],
+            [
+              72.94,
+              19.03
+            ],
+            [
+              72.94,
+              19.07
+            ],
+            [
+              72.9,
+              19.07
+            ],
+            [
+              72.9,
+              19.03
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "M/W",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.88,
+              19.04
+            ],
+            [
+              72.92,
+              19.04
+            ],
+            [
+              72.92,
+              19.08
+            ],
+            [
+              72.88,
+              19.08
+            ],
+            [
+              72.88,
+              19.04
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "N",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.89,
+              19.07
+            ],
+            [
+              72.93,
+              19.07
+            ],
+            [
+              72.93,
+              19.11
+            ],
+            [
+              72.89,
+              19.11
+            ],
+            [
+              72.89,
+              19.07
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "P/N",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.82,
+              19.17
+            ],
+            [
+              72.86,
+              19.17
+            ],
+            [
+              72.86,
+              19.21
+            ],
+            [
+              72.82,
+              19.21
+            ],
+            [
+              72.82,
+              19.17
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "P/S",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.82,
+              19.15
+            ],
+            [
+              72.86,
+              19.15
+            ],
+            [
+              72.86,
+              19.19
+            ],
+            [
+              72.82,
+              19.19
+            ],
+            [
+              72.82,
+              19.15
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "R/C",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.84,
+              19.21
+            ],
+            [
+              72.88,
+              19.21
+            ],
+            [
+              72.88,
+              19.25
+            ],
+            [
+              72.84,
+              19.25
+            ],
+            [
+              72.84,
+              19.21
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "R/N",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.84,
+              19.23
+            ],
+            [
+              72.88,
+              19.23
+            ],
+            [
+              72.88,
+              19.27
+            ],
+            [
+              72.84,
+              19.27
+            ],
+            [
+              72.84,
+              19.23
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "R/S",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.81,
+              19.17
+            ],
+            [
+              72.85,
+              19.17
+            ],
+            [
+              72.85,
+              19.21
+            ],
+            [
+              72.81,
+              19.21
+            ],
+            [
+              72.81,
+              19.17
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "S",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.92,
+              19.05
+            ],
+            [
+              72.96,
+              19.05
+            ],
+            [
+              72.96,
+              19.09
+            ],
+            [
+              72.92,
+              19.09
+            ],
+            [
+              72.92,
+              19.05
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "ward_id": "T",
+        "provenance": "bmc-mumbai-approximate-centroid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              72.93,
+              19.16
+            ],
+            [
+              72.97,
+              19.16
+            ],
+            [
+              72.97,
+              19.2
+            ],
+            [
+              72.93,
+              19.2
+            ],
+            [
+              72.93,
+              19.16
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

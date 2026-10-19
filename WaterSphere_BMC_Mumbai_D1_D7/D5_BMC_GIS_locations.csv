@@ -1,0 +1,32 @@
+Feature_Type,Feature_ID,Name,Lat,Lon,Geometry_WKT,Area_km2,Geometry_Status
+WARD,A,Ward A,18.92,72.83,POINT (72.83 18.92),6.46,approximate_centroid
+WARD,B,Ward B,18.96,72.84,POINT (72.84 18.96),4.13,approximate_centroid
+WARD,C,Ward C,18.95,72.82,POINT (72.82 18.95),2.89,approximate_centroid
+WARD,D,Ward D,18.96,72.81,POINT (72.81 18.96),29.2,approximate_centroid
+WARD,E,Ward E,18.98,72.84,POINT (72.84 18.98),5.18,approximate_centroid
+WARD,F/S,Ward F South,19.0,72.85,POINT (72.85 19.0),29.29,approximate_centroid
+WARD,F/N,Ward F North,19.03,72.86,POINT (72.86 19.03),25.05,approximate_centroid
+WARD,G/S,Ward G South,18.99,72.82,POINT (72.82 18.99),16.52,approximate_centroid
+WARD,G/N,Ward G North,19.04,72.84,POINT (72.84 19.04),28.84,approximate_centroid
+WARD,H/E,Ward H East,19.06,72.85,POINT (72.85 19.06),10.85,approximate_centroid
+WARD,H/W,Ward H West,19.07,72.83,POINT (72.83 19.07),29.79,approximate_centroid
+WARD,K/E,Ward K East,19.12,72.87,POINT (72.87 19.12),30.1,approximate_centroid
+WARD,K/W,Ward K West,19.13,72.82,POINT (72.82 19.13),24.85,approximate_centroid
+WARD,L,Ward L,19.07,72.88,POINT (72.88 19.07),22.72,approximate_centroid
+WARD,M/E,Ward M East,19.05,72.92,POINT (72.92 19.05),8.38,approximate_centroid
+WARD,M/W,Ward M West,19.06,72.9,POINT (72.9 19.06),21.1,approximate_centroid
+WARD,N,Ward N,19.09,72.91,POINT (72.91 19.09),26.66,approximate_centroid
+WARD,P/S,Ward P South,19.17,72.84,POINT (72.84 19.17),30.79,approximate_centroid
+WARD,P/N,Ward P North,19.19,72.84,POINT (72.84 19.19),28.22,approximate_centroid
+WARD,R/S,Ward R South,19.19,72.83,POINT (72.83 19.19),10.39,approximate_centroid
+WARD,R/C,Ward R Central,19.23,72.86,POINT (72.86 19.23),30.26,approximate_centroid
+WARD,R/N,Ward R North,19.25,72.86,POINT (72.86 19.25),10.86,approximate_centroid
+WARD,S,Ward S,19.07,72.94,POINT (72.94 19.07),20.61,approximate_centroid
+WARD,T,Ward T,19.18,72.95,POINT (72.95 19.18),11.84,approximate_centroid
+RESERVOIR,Vihar,Vihar,19.13,72.93,POINT (72.93 19.13),,approximate_reference_point
+RESERVOIR,Tulsi,Tulsi,19.18,72.94,POINT (72.94 19.18),,approximate_reference_point
+RESERVOIR,Tansa,Tansa,19.82,73.1,POINT (73.1 19.82),,approximate_reference_point
+RESERVOIR,Modak Sagar,Modak Sagar,19.62,73.2,POINT (73.2 19.62),,approximate_reference_point
+RESERVOIR,Upper Vaitarna,Upper Vaitarna,19.55,73.4,POINT (73.4 19.55),,approximate_reference_point
+RESERVOIR,Middle Vaitarna,Middle Vaitarna,19.78,73.37,POINT (73.37 19.78),,approximate_reference_point
+RESERVOIR,Bhatsa,Bhatsa,19.45,73.25,POINT (73.25 19.45),,approximate_reference_point

@@ -1,0 +1,25 @@
+ward_id,ward_name,area_km2
+A,Ward A,6.46
+B,Ward B,4.13
+C,Ward C,2.89
+D,Ward D,29.2
+E,Ward E,5.18
+F/N,Ward F North,25.05
+F/S,Ward F South,29.29
+G/N,Ward G North,28.84
+G/S,Ward G South,16.52
+H/E,Ward H East,10.85
+H/W,Ward H West,29.79
+K/E,Ward K East,30.1
+K/W,Ward K West,24.85
+L,Ward L,22.72
+M/E,Ward M East,8.38
+M/W,Ward M West,21.1
+N,Ward N,26.66
+P/N,Ward P North,28.22
+P/S,Ward P South,30.79
+R/C,Ward R Central,30.26
+R/N,Ward R North,10.86
+R/S,Ward R South,10.39
+S,Ward S,20.61
+T,Ward T,11.84

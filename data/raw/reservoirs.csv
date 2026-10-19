@@ -1,0 +1,8 @@
+reservoir_id,reservoir_name,lat,lon,capacity_mcm,serving_wards
+Bhatsa,Bhatsa,19.45,73.25,976.0,A;G/S;M/E;R/N
+Middle Vaitarna,Middle Vaitarna,19.78,73.37,202.1,D;H/W;P/S
+Modak Sagar,Modak Sagar,19.62,73.2,128.0,C;H/E;N;T
+Tansa,Tansa,19.82,73.1,80.9,B;G/N;M/W;S
+Tulsi,Tulsi,19.18,72.94,11.0,F/N;L;R/C
+Upper Vaitarna,Upper Vaitarna,19.55,73.4,331.0,E;K/E;P/N
+Vihar,Vihar,19.13,72.93,9.2,F/S;K/W;R/S

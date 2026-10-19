@@ -1,0 +1,10 @@
+# API image: Linux x86_64 (native XGBoost/TF work here). Model training lives in Dockerfile.ml.
+FROM watersphere-ml
+COPY backend/requirements.txt ./backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt
+WORKDIR /code
+COPY backend/ ./backend/
+COPY alembic.ini ./
+COPY alembic/ ./alembic/
+ENV PYTHONPATH=/code/backend
+EXPOSE 8000

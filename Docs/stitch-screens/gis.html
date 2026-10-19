@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WaterSphere AI — BMC Mumbai Pilot | GIS Stress-Zone SCADA Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-container": "#003e61",
+            "surface": "#f6f9ff",
+            "secondary-fixed": "#8df9ac",
+            "surface-dim": "#c8ddf0",
+            "surface-container": "#e0f0ff",
+            "primary-fixed-dim": "#a2caf7",
+            "on-primary-fixed": "#001d34",
+            "on-background": "#071d2c",
+            "background": "#f6f9ff",
+            "on-primary-fixed-variant": "#1d496f",
+            "secondary-fixed-dim": "#71dc92",
+            "on-surface-variant": "#42474e",
+            "primary": "#002743",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#4dacf1",
+            "outline": "#72777f",
+            "tertiary": "#002740",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#1e3241",
+            "on-primary-container": "#80a8d3",
+            "tertiary-fixed": "#cce5ff",
+            "surface-container-low": "#ebf5ff",
+            "inverse-primary": "#a2caf7",
+            "surface-container-high": "#d6ebff",
+            "surface-bright": "#f6f9ff",
+            "on-tertiary-fixed": "#001d31",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed-variant": "#004b73",
+            "outline-variant": "#c2c7cf",
+            "surface-variant": "#d0e5f9",
+            "secondary-container": "#8af6a9",
+            "on-secondary-fixed-variant": "#005229",
+            "on-surface": "#071d2c",
+            "surface-tint": "#386188",
+            "error": "#ba1a1a",
+            "tertiary-fixed-dim": "#93ccff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#d0e5f9",
+            "inverse-on-surface": "#e6f2ff",
+            "error-container": "#ffdad6",
+            "primary-container": "#0b3d62",
+            "on-secondary-container": "#00723b",
+            "secondary": "#006d38",
+            "on-secondary": "#ffffff",
+            "primary-fixed": "#cfe5ff",
+            "on-secondary-fixed": "#00210d"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "0.75rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "gutter": "1rem",
+            "space-lg": "1rem"
+          },
+          "fontFamily": {
+            "telemetry-metric": ["Inter"],
+            "headline-sm": ["Inter"],
+            "data-unit": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-caps": ["Inter"],
+            "headline-md": ["Inter"],
+            "display-telemetry-mobile": ["Inter"],
+            "body-default": ["Inter"],
+            "display-telemetry": ["Inter"],
+            "body-dense": ["Inter"]
+          },
+          "fontSize": {
+            "telemetry-metric": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "data-unit": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "display-telemetry-mobile": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-default": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "display-telemetry": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-dense": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.4); opacity: 0.2; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .reservoir-pulse {
+      animation: pulse-ring 2.5s infinite ease-in-out;
+      transform-origin: center;
+    }
+  </style>
+</head>
+<body class="bg-[#F4F7FA] text-on-surface antialiased overflow-x-hidden min-h-screen flex flex-col font-body-default">
+<!-- 1. GLOBAL ANCHOR HEADER (Deep Navy #0B3D62) -->
+<header class="bg-primary-container text-on-primary fixed top-0 left-0 w-full h-14 md:h-16 px-space-lg md:px-space-xl flex justify-between items-center z-50 shadow-md border-b border-[#082C47]">
+<!-- Brand / Pilot / Data Version -->
+<div class="flex items-center space-x-3 md:space-x-4">
+<div class="flex items-center space-x-2.5">
+<img alt="WaterSphere AI Logo" class="w-8 h-8 rounded-lg shadow-sm border border-tertiary-container object-contain bg-white/10 p-0.5" src="https://lh3.googleusercontent.com/aida/AEtjO1VhlDjdXqBgd_kLVbEKASHku_7zUk8f52aU1BUCOEt_gUXigg12kuEJx_ET6LQWaW7A2-blqvaxI-phqZd8CBlGftCM-8J7kXM-wS7ZP5IkXbVYMEMSWS5vbbc7faoOqDmIRbq-WoQD0QmSXUxA6A4kys6KVGYjth0O_aTXH3asfITsV6vWWSOdrQO73_cIYlUz97h7pUbj4Y3u4x3BctD-Wu0FG2MM8TyMaoTTgMfgymWwzeu0tpjBnfQ"/>
+<div class="flex flex-col">
+<div class="flex items-center space-x-2">
+<span class="text-headline-md font-headline-md font-bold text-on-primary tracking-tight">WaterSphere AI</span>
+<span class="bg-[#0284C7] text-white text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded leading-none uppercase">PILOT</span>
+</div>
+<span class="text-[10px] text-on-primary-container tracking-wider uppercase font-semibold">BMC Mumbai SCADA Suite</span>
+</div>
+</div>
+<div class="h-6 w-px bg-white/20 hidden md:block"></div>
+<!-- Version Chip & Live SCADA Indicator -->
+<div class="hidden lg:flex items-center space-x-2">
+<span class="bg-[#082C47] text-[#7DD3FC] border border-[#1d496f] px-2 py-0.5 rounded text-[11px] font-mono tracking-tight font-semibold">bmc-v1 data</span>
+<div class="flex items-center space-x-1.5 bg-[#082C47]/60 px-2 py-0.5 rounded border border-white/10">
+<span class="inline-block w-2 h-2 rounded-full bg-[#2E9E5B] animate-pulse"></span>
+<span class="text-label-caps font-label-caps text-surface">SCADA Online: <strong class="text-white tabular-nums">4,120 ML/d</strong></span>
+</div>
+</div>
+</div>
+<!-- Center Navigation Links (From JSON context) -->
+<nav class="hidden xl:flex items-center space-x-6 text-body-dense font-medium">
+<a class="text-on-primary-container hover:text-on-primary transition-colors duration-150" href="#">Live Grid</a>
+<a class="text-on-primary-container hover:text-on-primary transition-colors duration-150" href="#">Hydrology</a>
+<a class="text-on-primary border-b-2 border-secondary-fixed font-bold pb-1" href="#">Distribution</a>
+<a class="text-on-primary-container hover:text-on-primary transition-colors duration-150" href="#">Alerts</a>
+</nav>
+<!-- Role Switcher & Trailing Engineer Profile -->
+<div class="flex items-center space-x-3">
+<!-- Role Switcher Segmented Control -->
+<div class="bg-[#082C47] p-0.5 rounded-lg flex items-center border border-white/10">
+<button class="bg-surface-container-lowest text-primary-container font-semibold text-[11px] px-2.5 py-1 rounded shadow-sm">
+          Admin (All 24 Wards)
+        </button>
+<button class="text-[#9BB3C7] hover:text-white text-[11px] font-medium px-2.5 py-1 rounded transition-colors">
+          Citizen (Own Ward)
+        </button>
+</div>
+<!-- Trailing Action Icons -->
+<div class="hidden sm:flex items-center space-x-1 border-l border-white/15 pl-2">
+<button class="p-1.5 rounded-lg hover:bg-white/10 text-white relative transition-colors" title="Telemetry Notifications">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-[#D64545] rounded-full ring-2 ring-primary-container"></span>
+</button>
+<button class="p-1.5 rounded-lg hover:bg-white/10 text-white transition-colors" title="Sync SCADA Streams">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</button>
+</div>
+<!-- Chief Engineer User Identity -->
+<div class="flex items-center space-x-2 pl-2 border-l border-white/15">
+<img alt="MCGM Chief Hydrological Engineer Avatar" class="w-8 h-8 rounded-full border-2 border-[#7DD3FC] object-cover shadow" src="https://lh3.googleusercontent.com/aida/AEtjO1VC4K5ricnfLQLsaPrDwsljja49wNDw-9pJubsxLM6dwXTXX5yOoYxcpSDDk6YeFUOWEsuvStEE6n7hqZXLrooN2XFrjhOY8AuMJKcNdpCjIAtWtigSow1DocDPL-1F8E36F7VpxtHMRkBBf2tQUOYGxwFVeN0FKDKxYKZOlI7-A-UfUvId-xSAlpry8bFqQlmVqthphj6CLZ8gOxSndHSMDFiJwYL4oUpUdCcsOraQaXmDZlUt9p0jWHk"/>
+<div class="hidden 2xl:flex flex-col text-left">
+<span class="text-[12px] font-semibold text-white leading-tight">Er. S. Patwardhan</span>
+<span class="text-[10px] text-on-primary-container leading-none">Chief Engineer, Hydrology</span>
+</div>
+</div>
+</div>
+</header>
+<!-- 2. CONTEXT SUB-BAR COMMAND STRIP (56px) -->
+<div class="fixed top-14 md:top-16 left-0 w-full bg-white border-b border-[#D8E2EC] h-12 z-30 px-space-lg md:px-space-xl flex items-center justify-between shadow-xs">
+<div class="flex items-center space-x-3 overflow-x-auto py-1">
+<!-- Ward Dropdown Trigger -->
+<div class="flex items-center bg-[#F4F7FA] border border-[#D8E2EC] rounded-lg px-2.5 py-1 text-on-surface text-body-dense font-medium shadow-2xs">
+<span class="material-symbols-outlined text-[16px] text-primary-container mr-1.5">location_city</span>
+<span class="font-semibold text-primary">Ward Selection:</span>
+<span class="ml-1 text-on-surface">All 24 Wards (City Summary)</span>
+<span class="material-symbols-outlined text-[16px] text-[#5A6E7F] ml-1.5">expand_more</span>
+</div>
+<!-- Date Picker -->
+<div class="flex items-center bg-[#F4F7FA] border border-[#D8E2EC] rounded-lg px-2.5 py-1 text-body-dense font-medium shadow-2xs">
+<span class="material-symbols-outlined text-[16px] text-primary-container mr-1.5">calendar_today</span>
+<span class="text-on-surface tabular-nums font-semibold">2025-12-20</span>
+<span class="text-[10px] text-[#5A6E7F] ml-1 font-mono">(IST)</span>
+</div>
+<!-- Horizon Quick Buttons -->
+<div class="flex items-center bg-[#F4F7FA] p-0.5 rounded-lg border border-[#D8E2EC] text-[11px] font-semibold text-[#5A6E7F]">
+<button class="px-2 py-0.5 rounded bg-white text-primary-container shadow-xs font-bold">Today</button>
+<button class="px-2 py-0.5 hover:text-on-surface transition-colors">3-Day</button>
+<button class="px-2 py-0.5 hover:text-on-surface transition-colors">7-Day</button>
+<button class="px-2 py-0.5 hover:text-on-surface transition-colors">45-Day SCADA</button>
+</div>
+</div>
+<!-- Citywide Reservoir Summary Pill -->
+<div class="hidden lg:flex items-center bg-[#EAF7EE] border border-[#BCE4CA] px-3 py-1 rounded-full text-body-dense text-[#2E9E5B] font-semibold shadow-2xs">
+<span class="inline-block w-2 h-2 rounded-full bg-[#2E9E5B] mr-2"></span>
+<span>Citywide Reservoir Net Storage: <strong class="tabular-nums font-bold">84.6%</strong> · Total Draw: <strong class="tabular-nums font-bold">3,920 ML/d</strong></span>
+</div>
+</div>
+<!-- 3. MAIN WORKSPACE WITH FIXED SIDEBAR AND CANVAS -->
+<div class="pt-26 md:pt-28 flex flex-1">
+<!-- LEFT NAVIGATION SIDEBAR (Width 64 / 256px) -->
+<aside class="w-64 fixed left-0 top-26 md:top-28 bottom-0 bg-[#F8FAFC] border-r border-[#D8E2EC] flex flex-col justify-between p-3 z-20 overflow-y-auto">
+<div>
+<!-- Sidebar Category Header -->
+<div class="px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] mb-2">
+<div class="flex flex-col">
+<span class="text-headline-sm font-headline-sm text-primary font-bold">Hydraulic Command</span>
+<span class="text-[11px] text-[#5A6E7F]">Zone II - Sub-SCADA</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-[#0B3D62]">tune</span>
+</div>
+<!-- Navigation Tabs -->
+<nav class="space-y-1 text-body-dense font-medium">
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-[#5A6E7F] hover:bg-[#E2E8F0] transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]">dashboard</span>
+<span>Overview</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-[#5A6E7F] hover:bg-[#E2E8F0] transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]">monitoring</span>
+<span>Forecasts</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-[#5A6E7F] hover:bg-[#E2E8F0] transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]">water_loss</span>
+<span>Water Stress</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-[#5A6E7F] hover:bg-[#E2E8F0] transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]">alt_route</span>
+<span>Supply Plan</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-[#5A6E7F] hover:bg-[#E2E8F0] transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]">water_damage</span>
+<span>Reservoirs</span>
+</a>
+<!-- ACTIVE GIS MAP TAB -->
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-surface-container-high border-l-4 border-primary text-primary font-bold shadow-2xs" href="#">
+<span class="material-symbols-outlined text-[19px] text-primary" data-weight="fill">map</span>
+<span>GIS Map</span>
+<span class="ml-auto bg-primary text-white text-[10px] px-1.5 py-0.5 rounded font-mono">LIVE</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-[#5A6E7F] hover:bg-[#E2E8F0] transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]">plumbing</span>
+<span>Leakage</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 rounded-lg text-[#5A6E7F] hover:bg-[#E2E8F0] transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px]">report</span>
+<span>Complaints</span>
+</a>
+</nav>
+</div>
+<!-- SCADA FEED Bhandup Treatment Complex Status Box -->
+<div class="bg-white border border-[#D8E2EC] rounded-xl p-3 shadow-xs">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-label-caps font-label-caps text-[#5A6E7F] uppercase tracking-wider">SCADA Master Link</span>
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2E9E5B] opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-[#2E9E5B]"></span>
+</span>
+</div>
+<p class="text-[12px] font-bold text-on-surface">Bhandup Complex (WTP)</p>
+<p class="text-[11px] text-[#5A6E7F] mt-0.5">Filtration Stage: Nominal (2,810 ML/d)</p>
+<div class="mt-2 pt-2 border-t border-[#EDF2F7] flex items-center justify-between text-[10px] text-[#72777F]">
+<span>Telemetry Rate: 1200 bps</span>
+<span class="text-[#2E9E5B] font-semibold">SYNCHRONIZED</span>
+</div>
+</div>
+</aside>
+<!-- MAIN GIS MAP CONTENT CANVAS -->
+<main class="ml-64 flex-1 p-space-md md:p-space-lg flex flex-col space-y-4">
+<!-- Map Action Header & Layer Controls -->
+<div class="bg-white border border-[#D8E2EC] rounded-xl p-3.5 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+<div class="flex flex-col">
+<div class="flex items-center space-x-2">
+<h1 class="text-headline-lg font-headline-lg text-primary font-bold">Citywide Ward Stress GIS &amp; Hydraulic Spatial Telemetry</h1>
+<span class="bg-[#0B3D62] text-white text-[10px] font-mono px-2 py-0.5 rounded uppercase font-semibold">EPSG:4326</span>
+</div>
+<span class="text-body-dense font-body-dense text-[#5A6E7F] mt-0.5">
+            Backend: <code class="bg-[#F1F5F9] px-1.5 py-0.5 rounded text-[#0B3D62] font-mono text-[11px]">GET /api/gis?date=2025-12-20</code> | GeoJSON Centroid Bounds &amp; Source Reservoirs
+          </span>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<!-- Layer Toggles -->
+<div class="flex items-center bg-[#F4F7FA] border border-[#D8E2EC] rounded-lg p-1 text-[11px] font-semibold space-x-1">
+<button class="bg-white text-primary border border-[#D8E2EC] px-2 py-1 rounded shadow-2xs flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px] text-[#2E9E5B]">check_circle</span>
+<span>Wards Layer: ON</span>
+</button>
+<button class="bg-white text-primary border border-[#D8E2EC] px-2 py-1 rounded shadow-2xs flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px] text-[#2E9E5B]">check_circle</span>
+<span>Reservoirs: ON</span>
+</button>
+<button class="bg-white text-primary border border-[#D8E2EC] px-2 py-1 rounded shadow-2xs flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px] text-[#2E9E5B]">check_circle</span>
+<span>Aqueducts: ON</span>
+</button>
+</div>
+<!-- Utility Action Buttons -->
+<button class="bg-white hover:bg-[#F4F7FA] border border-[#D8E2EC] text-on-surface text-body-dense font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-colors shadow-2xs">
+<span class="material-symbols-outlined text-[16px] text-primary">download</span>
+<span>Export GeoJSON Layer</span>
+</button>
+<button class="bg-primary-container hover:bg-[#082C47] text-white text-body-dense font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-2xs">
+<span class="material-symbols-outlined text-[16px] text-secondary-fixed">refresh</span>
+<span>Refresh Telemetry (12s)</span>
+</button>
+</div>
+</div>
+<!-- Authority Notice Banner -->
+<div class="bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] px-3.5 py-1.5 rounded-lg text-body-dense flex items-center space-x-2">
+<span class="material-symbols-outlined text-[18px] text-[#D97706]">info</span>
+<span><strong>Civic Hydrographic Note:</strong> Polygons are approximate centroid boxes — authoritative BMC administrative boundaries pending survey reconciliation (CT-2025 rev4).</span>
+</div>
+<!-- SPLIT VIEW: MAP (68%) + SCADA OPS TABLE (32%) -->
+<div class="grid grid-cols-1 2xl:grid-cols-12 gap-4 items-start">
+<!-- LEFT/TOP: GIS MAP CANVAS (8 COLS on 2xl) -->
+<div class="2xl:col-span-8 flex flex-col space-y-3">
+<div class="relative bg-white border border-[#D8E2EC] rounded-xl overflow-hidden shadow-sm h-[720px] flex flex-col">
+<!-- Interactive Map Header & Quick Legend Strip -->
+<div class="absolute top-3 left-3 right-3 z-10 flex flex-wrap items-center justify-between pointer-events-none gap-2">
+<!-- Location Marker Tag -->
+<div class="pointer-events-auto bg-white/95 backdrop-blur-md border border-[#D8E2EC] rounded-lg px-3 py-1.5 shadow-md flex items-center space-x-2">
+<span class="material-symbols-outlined text-[18px] text-[#0B3D62]">my_location</span>
+<div class="flex flex-col">
+<span class="text-[12px] font-bold text-primary">Mumbai Hydrological Basin</span>
+<span class="text-[10px] text-[#5A6E7F] font-mono">19.0760° N, 72.8777° E · Carto Positron Base</span>
+</div>
+</div>
+<!-- Map Legend Bar -->
+<div class="pointer-events-auto bg-white/95 backdrop-blur-md border border-[#D8E2EC] rounded-lg px-3 py-1.5 shadow-md flex items-center space-x-3 text-[11px] font-medium text-on-surface">
+<div class="flex items-center space-x-1.5">
+<span class="w-3 h-3 rounded-sm bg-[#2E9E5B] border border-[#BCE4CA]"></span>
+<span>Safe (≥1.00)</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3 h-3 rounded-sm bg-[#C9A100] border border-[#F4E299]"></span>
+<span>Moderate (0.85-0.99)</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3 h-3 rounded-sm bg-[#E07B00] border border-[#F9D3A8]"></span>
+<span>High Stress (0.70-0.84)</span>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="w-3 h-3 rounded-sm bg-[#D64545] border border-[#F5B8B8]"></span>
+<span>Shortage (&lt;0.70)</span>
+</div>
+<div class="flex items-center space-x-1.5 pl-2 border-l border-gray-300">
+<span class="w-2.5 h-2.5 rounded-full bg-[#0284C7] ring-2 ring-[#7DD3FC]"></span>
+<span class="text-primary font-semibold">Reservoir Dam</span>
+</div>
+</div>
+</div>
+<!-- MAP TOOLS OVERLAY (Top-Right / Bottom-Right) -->
+<div class="absolute right-3 top-16 z-10 flex flex-col space-y-1.5">
+<button class="w-8 h-8 bg-white border border-[#D8E2EC] rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-[#F4F7FA] font-bold text-lg">+</button>
+<button class="w-8 h-8 bg-white border border-[#D8E2EC] rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-[#F4F7FA] font-bold text-lg">-</button>
+<button class="w-8 h-8 bg-white border border-[#D8E2EC] rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-[#F4F7FA]" title="Reset North">
+<span class="material-symbols-outlined text-[16px]">explore</span>
+</button>
+<button class="w-8 h-8 bg-white border border-[#D8E2EC] rounded-lg shadow-md flex items-center justify-center text-primary hover:bg-[#F4F7FA]" title="Layers">
+<span class="material-symbols-outlined text-[16px]">layers</span>
+</button>
+</div>
+<!-- MAP SCALE & COORDINATES (Bottom-Left) -->
+<div class="absolute bottom-3 left-3 z-10 bg-white/95 backdrop-blur-xs border border-[#D8E2EC] rounded px-2.5 py-1 text-[10px] font-mono text-[#5A6E7F] flex items-center space-x-3 shadow-xs">
+<div class="flex items-center space-x-1">
+<span class="w-12 h-1 bg-[#0B3D62] inline-block"></span>
+<span>5 km / 3 mi</span>
+</div>
+<span class="border-l border-gray-300 pl-2">Cursor: 19.0824° N, 72.8911° E</span>
+</div>
+<!-- VECTOR GIS MAP (Scalable Cartographic SVG Layout) -->
+<div class="w-full h-full bg-[#E5EEF5] relative overflow-hidden select-none">
+<svg class="w-full h-full object-cover" viewbox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+<!-- Defs for markers and patterns -->
+<defs>
+<pattern height="40" id="grid-pattern" patternunits="userSpaceOnUse" width="40">
+<path d="M 40 0 L 0 0 0 40" fill="none" stroke="#D3DFEC" stroke-width="0.75"></path>
+</pattern>
+<filter height="120%" id="shadow" width="120%" x="-10%" y="-10%">
+<fedropshadow dx="0" dy="2" flood-opacity="0.15" stddeviation="3"></fedropshadow>
+</filter>
+</defs>
+<!-- Grid Background for SCADA precision -->
+<rect fill="#EBF2F8" height="800" width="1000"></rect>
+<rect fill="url(#grid-pattern)" height="800" width="1000"></rect>
+<!-- Water Bodies (Arabian Sea, Thane Creek, Mumbai Harbour, Mahim Bay) -->
+<!-- Arabian Sea Coastline left -->
+<path d="M 0,0 L 290,0 Q 300,120 280,240 Q 250,340 280,430 Q 240,510 260,600 Q 230,680 270,800 L 0,800 Z" fill="#D6E8F6" stroke="#BACFE2" stroke-width="1.5"></path>
+<!-- Thane Creek right -->
+<path d="M 680,0 Q 640,150 670,300 Q 690,460 620,580 Q 560,660 590,800 L 1000,800 L 1000,0 Z" fill="#D6E8F6" stroke="#BACFE2" stroke-width="1.5"></path>
+<!-- Mahim Bay Inset -->
+<path d="M 280,430 C 340,430 330,480 290,490 Z" fill="#D6E8F6" stroke="#BACFE2" stroke-width="1"></path>
+<!-- Water Labels -->
+<text fill="#7193AE" font-size="14" font-weight="600" letter-spacing="4" transform="rotate(-90 70,380)" x="70" y="380">ARABIAN SEA</text>
+<text fill="#7193AE" font-size="13" font-weight="600" letter-spacing="3" x="820" y="450">THANE CREEK</text>
+<text fill="#7193AE" font-size="11" font-weight="600" letter-spacing="2" x="440" y="740">MUMBAI HARBOUR</text>
+<!-- Trunk Aqueduct Pipelines (Blue dotted SCADA transmission lines) -->
+<g fill="none" opacity="0.85" stroke="#0284C7" stroke-dasharray="6,4" stroke-width="2.5">
+<!-- Bhatsa Main Trunk -->
+<path d="M 750,40 Q 660,120 540,180 T 490,320 T 440,520"></path>
+<!-- Vaitarna Aqua Express -->
+<path d="M 520,30 Q 480,100 460,200 T 420,360 T 360,560"></path>
+<!-- Tansa Supply Line to Chembur/Kurla -->
+<path d="M 620,60 Q 580,160 550,260 T 520,440 T 480,510"></path>
+</g>
+<!-- 24 WARD POLYGON BOUNDS (Thematic Ward Blocks) -->
+<!-- North Zones (R/N, R/C, R/S, P/N, P/S) -->
+<polygon fill="#2E9E5B" fill-opacity="0.32" points="320,100 430,90 440,160 330,170" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="385" y="135">R/N Dahisar (1.02)</text>
+<polygon fill="#E07B00" fill-opacity="0.45" points="330,170 440,160 450,230 325,240" stroke="#E07B00" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="387" y="205">R/C Borivali (0.76)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.32" points="325,240 450,230 460,300 320,310" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="390" y="275">R/S Kandivali (1.05)</text>
+<polygon fill="#E07B00" fill-opacity="0.45" points="320,310 460,300 450,380 300,390" stroke="#E07B00" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="385" y="350">P/N Malad (0.74)</text>
+<polygon fill="#C9A100" fill-opacity="0.4" points="300,390 450,380 440,440 290,445" stroke="#C9A100" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="370" y="420">P/S Goregaon (0.91)</text>
+<!-- Western & Central (K/W, K/E, H/W, H/E, S, T) -->
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="290,445 375,445 370,510 270,505" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="325" y="480">K/W Andheri W (1.01)</text>
+<polygon fill="#C9A100" fill-opacity="0.4" points="375,445 460,440 455,510 370,510" stroke="#C9A100" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="415" y="480">K/E Andheri E (0.89)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="460,300 580,290 570,390 450,380" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="515" y="345">T Ward Mulund (1.08)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="450,380 570,390 560,470 455,460" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="510" y="428">S Ward Bhandup (1.12)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="455,460 560,470 550,530 445,520" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="500" y="495">N Ward Ghatkopar (1.04)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="270,505 365,510 360,560 270,555" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="315" y="535">H/W Bandra W (1.10)</text>
+<polygon fill="#C9A100" fill-opacity="0.4" points="365,510 440,510 435,565 360,560" stroke="#C9A100" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="400" y="540">H/E Bandra E (0.87)</text>
+<!-- CRITICAL SHORTAGE WARDS: L (Kurla) & M/E (Chembur & Govandi) -->
+<!-- Kurla (Ward L) -->
+<polygon fill="#D64545" fill-opacity="0.55" points="435,510 520,510 510,575 435,565" stroke="#D64545" stroke-width="2"></polygon>
+<text fill="#7F1D1D" font-size="11" font-weight="bold" text-anchor="middle" x="475" y="542">L Kurla (0.68)</text>
+<!-- Chembur / Govandi (Ward M/E) - HIGHLIGHTED ACTIVE STRESS ZONE -->
+<polygon fill="#D64545" fill-opacity="0.6" points="510,515 610,520 600,600 500,585" stroke="#991B1B" stroke-dasharray="none" stroke-width="2.5"></polygon>
+<circle cx="555" cy="555" fill="#D64545" r="5" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<text fill="#5A0505" font-size="11" font-weight="800" text-anchor="middle" x="555" y="545">M/E Govandi (0.64)</text>
+<polygon fill="#C9A100" fill-opacity="0.4" points="495,585 580,595 565,650 485,635" stroke="#C9A100" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="532" y="618">M/W Chembur W (0.86)</text>
+<!-- City Core / South Island Wards (G/N, G/S, F/N, F/S, E, D, C, B, A) -->
+<polygon fill="#C9A100" fill-opacity="0.4" points="340,565 420,565 410,620 330,620" stroke="#C9A100" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="375" y="595">G/N Dadar (0.90)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="420,565 485,570 480,630 410,620" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="445" y="600">F/N Matunga (1.03)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="330,620 405,620 395,680 320,675" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="362" y="652">G/S Worli (1.08)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="405,620 475,625 465,680 395,680" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="435" y="655">F/S Parel (1.02)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="370,680 450,680 440,730 360,725" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="405" y="705">E Byculla (1.06)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="300,680 370,680 355,750 285,730" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="330" y="718">D Malabar Hill (1.14)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="355,730 435,730 425,785 345,780" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="390" y="758">C/B Kalbadevi (1.01)</text>
+<polygon fill="#2E9E5B" fill-opacity="0.35" points="345,780 430,785 410,800 335,800" stroke="#2E9E5B" stroke-width="1.5"></polygon>
+<text fill="#071D2C" font-size="10" font-weight="bold" text-anchor="middle" x="382" y="796">A Colaba/Fort (1.18)</text>
+<!-- 7 UPSTREAM RESERVOIR SENSORS & CATCHMENT INSETS -->
+<!-- 1. Bhatsa Dam -->
+<g transform="translate(820, 75)">
+<circle class="reservoir-pulse" cx="0" cy="0" fill="#0284C7" fill-opacity="0.25" r="14"></circle>
+<circle cx="0" cy="0" fill="#0284C7" r="8" stroke="#FFFFFF" stroke-width="2"></circle>
+<text fill="#0B3D62" font-size="11" font-weight="bold" x="12" y="4">Bhatsa (62.4%)</text>
+<text fill="#5A6E7F" font-mono"="" font-size="9" x="12" y="16">584,200 ML</text>
+</g>
+<!-- 2. Upper Vaitarna -->
+<g transform="translate(680, 50)">
+<circle class="reservoir-pulse" cx="0" cy="0" fill="#0284C7" fill-opacity="0.25" r="12"></circle>
+<circle cx="0" cy="0" fill="#0284C7" r="7" stroke="#FFFFFF" stroke-width="2"></circle>
+<text fill="#0B3D62" font-size="10" font-weight="bold" x="12" y="3">Up. Vaitarna (64.8%)</text>
+<text fill="#5A6E7F" font-mono"="" font-size="9" x="12" y="14">214,488 ML</text>
+</g>
+<!-- 3. Middle Vaitarna -->
+<g transform="translate(560, 40)">
+<circle cx="0" cy="0" fill="#0284C7" fill-opacity="0.25" r="10"></circle>
+<circle cx="0" cy="0" fill="#0284C7" r="6" stroke="#FFFFFF" stroke-width="2"></circle>
+<text fill="#0B3D62" font-size="10" font-weight="bold" text-anchor="end" x="-10" y="-10">Mid. Vaitarna (58.2%)</text>
+</g>
+<!-- 4. Modak Sagar -->
+<g transform="translate(480, 55)">
+<circle cx="0" cy="0" fill="#0284C7" fill-opacity="0.25" r="10"></circle>
+<circle cx="0" cy="0" fill="#0284C7" r="6" stroke="#FFFFFF" stroke-width="2"></circle>
+<text fill="#0B3D62" font-size="10" font-weight="bold" text-anchor="end" x="-10" y="4">Modak Sagar (61.0%)</text>
+</g>
+<!-- 5. Tansa -->
+<g transform="translate(640, 110)">
+<circle cx="0" cy="0" fill="#0284C7" fill-opacity="0.25" r="10"></circle>
+<circle cx="0" cy="0" fill="#0284C7" r="6" stroke="#FFFFFF" stroke-width="2"></circle>
+<text fill="#0B3D62" font-size="10" font-weight="bold" x="12" y="4">Tansa (55.4%)</text>
+</g>
+<!-- 6. Vihar (Local Sanjay Gandhi National Park) -->
+<g transform="translate(490, 360)">
+<circle cx="0" cy="0" fill="#0284C7" r="8" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<text fill="#0B3D62" font-size="9" font-weight="bold" x="10" y="4">Vihar (48.6%)</text>
+</g>
+<!-- 7. Tulsi (Local) -->
+<g transform="translate(470, 330)">
+<circle cx="0" cy="0" fill="#0284C7" r="8" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<text fill="#0B3D62" font-size="9" font-weight="bold" text-anchor="end" x="-10" y="4">Tulsi (52.8%)</text>
+</g>
+<!-- Centroid Crosshair Marker for active view -->
+<g transform="translate(555, 555)">
+<line stroke="#BA1A1A" stroke-width="1.5" x1="-12" x2="12" y1="0" y2="0"></line>
+<line stroke="#BA1A1A" stroke-width="1.5" x1="0" x2="0" y1="-12" y2="12"></line>
+</g>
+</svg>
+<!-- FLOATING INTERACTIVE POPUP OVER WARD M/E (Chembur & Govandi) -->
+<div class="absolute top-[58%] left-[45%] z-20 w-80 bg-white/95 backdrop-blur-md border border-[#F5B8B8] rounded-xl shadow-xl p-3.5 pointer-events-auto">
+<div class="flex items-start justify-between border-b border-[#FEE2E2] pb-2">
+<div class="flex flex-col">
+<div class="flex items-center space-x-1.5">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-[#D64545] animate-ping"></span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface">Ward M/E (Chembur/Govandi)</h3>
+</div>
+<span class="text-[11px] text-[#991B1B] font-semibold mt-0.5">Critical Shortage · WAR: 0.642</span>
+</div>
+<span class="bg-[#FBEEEE] text-[#D64545] border border-[#F5B8B8] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                    SHORTAGE
+                  </span>
+</div>
+<div class="grid grid-cols-2 gap-2 my-2.5 text-body-dense font-mono">
+<div class="bg-[#F8FAFC] p-1.5 rounded border border-[#E2E8F0]">
+<span class="text-[10px] text-[#5A6E7F] block">Forecast Demand</span>
+<span class="font-bold text-on-surface tabular-nums">198.0 ML</span>
+</div>
+<div class="bg-[#F8FAFC] p-1.5 rounded border border-[#E2E8F0]">
+<span class="text-[10px] text-[#5A6E7F] block">Available Inflow</span>
+<span class="font-bold text-on-surface tabular-nums">125.0 ML</span>
+</div>
+<div class="bg-[#FBEEEE] p-1.5 rounded border border-[#F5B8B8]">
+<span class="text-[10px] text-[#D64545] block">Supply Deficit</span>
+<span class="font-bold text-[#D64545] tabular-nums">-73.0 ML</span>
+</div>
+<div class="bg-[#F8FAFC] p-1.5 rounded border border-[#E2E8F0]">
+<span class="text-[10px] text-[#5A6E7F] block">Feeder Line</span>
+<span class="font-bold text-on-surface truncate">Tansa Trunk 1</span>
+</div>
+</div>
+<div class="bg-[#FFF1F2] border border-[#FECDD3] rounded p-1.5 text-[11px] text-[#9F1239] flex items-center space-x-1.5 mb-2.5">
+<span class="material-symbols-outlined text-[15px] text-[#E11D48]">local_shipping</span>
+<span><strong>Action:</strong> Auxiliary Tanker Protocol Initiated (42 BMC Trucks En Route)</span>
+</div>
+<div class="flex items-center space-x-2">
+<button class="flex-1 bg-primary text-white text-[11px] font-semibold py-1 rounded hover:bg-primary-container transition-colors">
+                    Divert Trombay Line
+                  </button>
+<button class="bg-[#F4F7FA] border border-[#D8E2EC] text-[11px] font-semibold px-2 py-1 rounded hover:bg-white text-on-surface">
+                    Details
+                  </button>
+</div>
+</div>
+<!-- REGIONAL RESERVOIR INSET TOOLTIP (Bhatsa Dam Telemetry) -->
+<div class="absolute top-4 right-16 z-20 bg-white/95 backdrop-blur-sm border border-[#D8E2EC] rounded-lg p-2.5 shadow-lg w-56 pointer-events-auto hidden md:block">
+<div class="flex items-center justify-between text-body-dense">
+<span class="font-bold text-primary flex items-center space-x-1">
+<span class="material-symbols-outlined text-[15px] text-[#0284C7]">water</span>
+<span>Bhatsa Dam Head</span>
+</span>
+<span class="text-[10px] bg-[#EAF7EE] text-[#2E9E5B] font-bold px-1.5 py-0.2 rounded">NORMAL</span>
+</div>
+<div class="mt-1.5 text-[11px] text-[#5A6E7F] space-y-0.5 font-mono">
+<div class="flex justify-between">
+<span>Live Level:</span>
+<span class="font-bold text-on-surface tabular-nums">142.08 m</span>
+</div>
+<div class="flex justify-between">
+<span>FSL (Full Supply):</span>
+<span class="text-on-surface tabular-nums">142.07 m</span>
+</div>
+<div class="flex justify-between">
+<span>Outflow Rate:</span>
+<span class="font-bold text-[#0284C7] tabular-nums">2,280 ML/d</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT/BOTTOM: 24-WARD HYDRAULIC ADEQUACY TELEMETRY TABLE (4 COLS on 2xl) -->
+<div class="2xl:col-span-4 flex flex-col space-y-3">
+<div class="bg-white border border-[#D8E2EC] rounded-xl p-4 shadow-sm flex flex-col h-[720px]">
+<!-- Table Header & Filter Bar -->
+<div class="flex flex-col space-y-2.5 pb-3 border-b border-[#EDF2F7]">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[20px] text-primary-container">format_list_numbered</span>
+<h2 class="text-headline-sm font-headline-sm font-bold text-on-surface">Ward Hydraulic Adequacy Index</h2>
+</div>
+<span class="text-[11px] font-mono text-[#5A6E7F]">24/24 Online</span>
+</div>
+<!-- Filter Search & Quick Sorting -->
+<div class="flex items-center space-x-2">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-2 top-2 text-[16px] text-[#5A6E7F]">search</span>
+<input class="w-full bg-[#F8FAFC] border border-[#D8E2EC] rounded-lg pl-7 pr-2.5 py-1 text-body-dense text-on-surface focus:outline-none focus:border-primary" placeholder="Filter Ward / Locality..." type="text"/>
+</div>
+<select class="bg-[#F8FAFC] border border-[#D8E2EC] rounded-lg px-2 py-1 text-[11px] text-[#5A6E7F] font-semibold focus:outline-none">
+<option>Sort: WAR (Ascending)</option>
+<option>Sort: Highest Deficit</option>
+<option>Sort: Ward Code</option>
+</select>
+</div>
+</div>
+<!-- SCADA Data Table Container -->
+<div class="overflow-y-auto flex-1 mt-2 -mr-1 pr-1">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-[#F8FAFC] z-10 border-b border-[#E2E8F0]">
+<tr class="text-[10px] font-label-caps uppercase text-[#5A6E7F] tracking-wider">
+<th class="py-2 px-2">Ward / Locality</th>
+<th class="py-2 px-1 text-right">Demand</th>
+<th class="py-2 px-1 text-right">Inflow</th>
+<th class="py-2 px-1 text-right">WAR</th>
+<th class="py-2 px-2 text-center">Status</th>
+<th class="py-2 px-1 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#F1F5F9] text-[12px] font-body-dense">
+<!-- Row 1: Ward M/E (Shortage) -->
+<tr class="bg-[#FFF5F5] hover:bg-[#FEE2E2] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-[#991B1B]">Ward M/E</div>
+<div class="text-[10px] text-[#7F1D1D]">Chembur / Govandi</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">198.0</td>
+<td class="py-2 px-1 text-right tabular-nums text-[#D64545] font-semibold">125.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#D64545]">0.642</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#FBEEEE] text-[#D64545] border border-[#F5B8B8]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#D64545] mr-1"></span> SHORTAGE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: Ward L (Shortage) -->
+<tr class="bg-[#FFF5F5] hover:bg-[#FEE2E2] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-[#991B1B]">Ward L</div>
+<div class="text-[10px] text-[#7F1D1D]">Kurla Complex</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">184.5</td>
+<td class="py-2 px-1 text-right tabular-nums text-[#D64545] font-semibold">126.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#D64545]">0.681</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#FBEEEE] text-[#D64545] border border-[#F5B8B8]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#D64545] mr-1"></span> SHORTAGE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: Ward P/N (High Stress) -->
+<tr class="bg-[#FFFBF5] hover:bg-[#FDF2E6] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-[#9A3412]">Ward P/N</div>
+<div class="text-[10px] text-[#C2410C]">Malad West/East</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">210.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-semibold">156.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#E07B00]">0.742</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#FCF2E6] text-[#E07B00] border border-[#F9D3A8]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#E07B00] mr-1"></span> HI-STRESS
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: Ward R/C (High Stress) -->
+<tr class="bg-[#FFFBF5] hover:bg-[#FDF2E6] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-[#9A3412]">Ward R/C</div>
+<div class="text-[10px] text-[#C2410C]">Borivali Central</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">175.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-semibold">133.5</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#E07B00]">0.763</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#FCF2E6] text-[#E07B00] border border-[#F9D3A8]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#E07B00] mr-1"></span> HI-STRESS
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Ward M/W (Moderate) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward M/W</div>
+<div class="text-[10px] text-[#5A6E7F]">Chembur West</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">135.0</td>
+<td class="py-2 px-1 text-right tabular-nums">116.5</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#C9A100]">0.863</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#FDF8E6] text-[#C9A100] border border-[#F4E299]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C9A100] mr-1"></span> MODERATE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 6: Ward K/E (Moderate) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward K/E</div>
+<div class="text-[10px] text-[#5A6E7F]">Andheri East</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">245.0</td>
+<td class="py-2 px-1 text-right tabular-nums">218.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#C9A100]">0.890</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#FDF8E6] text-[#C9A100] border border-[#F4E299]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C9A100] mr-1"></span> MODERATE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 7: Ward G/N (Moderate) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward G/N</div>
+<div class="text-[10px] text-[#5A6E7F]">Dadar / Mahim</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">150.0</td>
+<td class="py-2 px-1 text-right tabular-nums">135.2</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#C9A100]">0.901</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#FDF8E6] text-[#C9A100] border border-[#F4E299]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#C9A100] mr-1"></span> MODERATE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 8: Ward K/W (Safe) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward K/W</div>
+<div class="text-[10px] text-[#5A6E7F]">Andheri West</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">220.0</td>
+<td class="py-2 px-1 text-right tabular-nums">222.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#2E9E5B]">1.009</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B] mr-1"></span> SAFE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 9: Ward F/N (Safe) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward F/N</div>
+<div class="text-[10px] text-[#5A6E7F]">Matunga / Sion</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">142.0</td>
+<td class="py-2 px-1 text-right tabular-nums">146.5</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#2E9E5B]">1.032</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B] mr-1"></span> SAFE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 10: Ward E (Safe) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward E</div>
+<div class="text-[10px] text-[#5A6E7F]">Byculla</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">115.0</td>
+<td class="py-2 px-1 text-right tabular-nums">122.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#2E9E5B]">1.061</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B] mr-1"></span> SAFE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 11: Ward S (Safe) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward S</div>
+<div class="text-[10px] text-[#5A6E7F]">Bhandup Complex</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">168.0</td>
+<td class="py-2 px-1 text-right tabular-nums">188.2</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#2E9E5B]">1.120</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B] mr-1"></span> SAFE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+<!-- Row 12: Ward A (Safe) -->
+<tr class="hover:bg-[#F8FAFC] transition-colors">
+<td class="py-2 px-2">
+<div class="font-bold text-on-surface">Ward A</div>
+<div class="text-[10px] text-[#5A6E7F]">Colaba &amp; Fort</div>
+</td>
+<td class="py-2 px-1 text-right tabular-nums">128.0</td>
+<td class="py-2 px-1 text-right tabular-nums">151.0</td>
+<td class="py-2 px-1 text-right tabular-nums font-bold text-[#2E9E5B]">1.180</td>
+<td class="py-2 px-2 text-center">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#2E9E5B] mr-1"></span> SAFE
+                      </span>
+</td>
+<td class="py-2 px-1 text-right">
+<button class="text-primary hover:text-[#0284C7] p-1" title="Locate on Map">
+<span class="material-symbols-outlined text-[16px]">location_searching</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Quick Action Footer Strip -->
+<div class="pt-2 border-t border-[#EDF2F7] flex items-center justify-between text-[11px] text-[#5A6E7F]">
+<span>Units: Megalitres (ML / 24h)</span>
+<button class="text-primary font-bold hover:underline flex items-center space-x-1">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+<span>Inspect Trunk Valves</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- BOTTOM CIVIC AUDIT METRIC SUMMARY CARDS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+<div class="bg-white border border-[#D8E2EC] rounded-xl p-3.5 shadow-xs flex items-center justify-between">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-[#5A6E7F] font-semibold">City Target Inflow</span>
+<div class="text-telemetry-metric font-telemetry-metric text-primary tabular-nums mt-0.5">3,950.0 <span class="text-[11px] font-normal text-[#5A6E7F]">ML/d</span></div>
+<span class="text-[11px] text-[#2E9E5B] font-medium">+1.8% vs. 10-Yr Monsoon Mean</span>
+</div>
+<span class="material-symbols-outlined text-[28px] text-[#0284C7] bg-[#E0F0FF] p-2 rounded-lg">water_drop</span>
+</div>
+<div class="bg-white border border-[#D8E2EC] rounded-xl p-3.5 shadow-xs flex items-center justify-between">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-[#5A6E7F] font-semibold">City Deficit Gap</span>
+<div class="text-telemetry-metric font-telemetry-metric text-[#D64545] tabular-nums mt-0.5">-94.5 <span class="text-[11px] font-normal text-[#5A6E7F]">ML/d</span></div>
+<span class="text-[11px] text-[#D64545] font-medium">Concentrated in Wards M/E &amp; L</span>
+</div>
+<span class="material-symbols-outlined text-[28px] text-[#D64545] bg-[#FBEEEE] p-2 rounded-lg">trending_down</span>
+</div>
+<div class="bg-white border border-[#D8E2EC] rounded-xl p-3.5 shadow-xs flex items-center justify-between">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-[#5A6E7F] font-semibold">Active Tanker Dispatches</span>
+<div class="text-telemetry-metric font-telemetry-metric text-on-surface tabular-nums mt-0.5">42 <span class="text-[11px] font-normal text-[#5A6E7F]">Units</span></div>
+<span class="text-[11px] text-[#E07B00] font-medium">Bhandup &amp; Trombay Depots</span>
+</div>
+<span class="material-symbols-outlined text-[28px] text-[#E07B00] bg-[#FCF2E6] p-2 rounded-lg">local_shipping</span>
+</div>
+<div class="bg-white border border-[#D8E2EC] rounded-xl p-3.5 shadow-xs flex items-center justify-between">
+<div>
+<span class="text-[11px] uppercase tracking-wider text-[#5A6E7F] font-semibold">Bhandup Master Aqueduct</span>
+<div class="text-telemetry-metric font-telemetry-metric text-[#2E9E5B] tabular-nums mt-0.5">3.42 <span class="text-[11px] font-normal text-[#5A6E7F]">bar</span></div>
+<span class="text-[11px] text-[#2E9E5B] font-medium">Hydraulic Pressure Stable</span>
+</div>
+<span class="material-symbols-outlined text-[28px] text-[#2E9E5B] bg-[#EAF7EE] p-2 rounded-lg">speed</span>
+</div>
+</div>
+</main>
+</div>
+<!-- 4. OFFICIAL CIVIC INFRASTRUCTURE FOOTER -->
+<footer class="ml-64 bg-white border-t border-[#D8E2EC] py-3 px-space-xl text-center text-body-dense text-[#5A6E7F] flex flex-col md:flex-row items-center justify-between gap-2 z-20">
+<div class="flex items-center space-x-2">
+<span class="font-semibold text-primary">Municipal Corporation of Greater Mumbai (MCGM)</span>
+<span>· Hydraulic Operations &amp; SCADA Control Room</span>
+</div>
+<div class="flex flex-wrap items-center justify-center gap-x-4 text-[11px] font-mono text-[#72777F]">
+<span>Emergency Hotline: <strong class="text-primary font-bold">1916</strong></span>
+<span>Version: <strong class="text-on-surface">bmc-v1.4.2</strong></span>
+<span>Protocol: <strong class="text-on-surface">IEC 60870-5-104</strong></span>
+<span>ISO 9001:2015 Verified</span>
+</div>
+</footer>
+</body></html>

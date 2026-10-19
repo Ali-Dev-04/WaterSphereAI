@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>WaterSphere AI — BMC Mumbai Pilot</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+  </style>
+<!-- Tailwind CSS v3 with configuration -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-container": "#8af6a9",
+            "primary": "#002743",
+            "surface": "#f6f9ff",
+            "on-tertiary-fixed": "#001d31",
+            "tertiary-fixed": "#cce5ff",
+            "on-tertiary-container": "#4dacf1",
+            "on-background": "#071d2c",
+            "surface-container-highest": "#d0e5f9",
+            "surface-bright": "#f6f9ff",
+            "primary-fixed-dim": "#a2caf7",
+            "on-primary-fixed-variant": "#1d496f",
+            "tertiary-fixed-dim": "#93ccff",
+            "on-surface-variant": "#42474e",
+            "surface-container": "#e0f0ff",
+            "surface-variant": "#d0e5f9",
+            "on-primary-container": "#80a8d3",
+            "secondary": "#006d38",
+            "on-error-container": "#93000a",
+            "on-secondary-fixed-variant": "#005229",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed-variant": "#004b73",
+            "on-secondary-container": "#00723b",
+            "outline": "#72777f",
+            "on-surface": "#071d2c",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#386188",
+            "surface-dim": "#c8ddf0",
+            "surface-container-high": "#d6ebff",
+            "on-primary": "#ffffff",
+            "tertiary": "#002740",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#001d34",
+            "tertiary-container": "#003e61",
+            "inverse-on-surface": "#e6f2ff",
+            "outline-variant": "#c2c7cf",
+            "on-secondary-fixed": "#00210d",
+            "secondary-fixed": "#8df9ac",
+            "primary-fixed": "#cfe5ff",
+            "error": "#ba1a1a",
+            "inverse-primary": "#a2caf7",
+            "on-secondary": "#ffffff",
+            "background": "#f6f9ff",
+            "surface-container-low": "#ebf5ff",
+            "primary-container": "#0b3d62",
+            "on-error": "#ffffff",
+            "inverse-surface": "#1e3241",
+            "secondary-fixed-dim": "#71dc92"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-xl": "1.5rem",
+            "gutter": "1rem",
+            "space-md": "0.75rem"
+          },
+          "fontFamily": {
+            "telemetry-metric": ["Inter", "sans-serif"],
+            "label-caps": ["Inter", "sans-serif"],
+            "body-default": ["Inter", "sans-serif"],
+            "display-telemetry": ["Inter", "sans-serif"],
+            "data-unit": ["Inter", "sans-serif"],
+            "display-telemetry-mobile": ["Inter", "sans-serif"],
+            "body-dense": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "telemetry-metric": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "body-default": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "display-telemetry": ["36px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "data-unit": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "display-telemetry-mobile": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-dense": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["15px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-surface text-on-surface antialiased flex justify-center selection:bg-primary selection:text-on-primary min-h-screen">
+<!-- Mobile Viewport Container (Simulated 360px portrait shell) -->
+<div class="w-full max-w-[390px] min-h-screen bg-[#F4F7FA] flex flex-col relative pb-20 shadow-xl border-x border-[#D8E2EC]">
+<!-- 1. COMPACT NAVY HEADER (#0B3D62) -->
+<header class="bg-primary-container text-on-primary sticky top-0 z-50 px-3.5 py-2.5 shadow-md border-b border-outline-variant/30">
+<!-- Top Row: Brand & Profile -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<!-- Logo Asset using the exact placeholder provided -->
+<img alt="WaterSphere AI Logo" class="w-8 h-8 rounded-lg object-contain bg-white/10 p-0.5" src="https://lh3.googleusercontent.com/aida/AEtjO1VhlDjdXqBgd_kLVbEKASHku_7zUk8f52aU1BUCOEt_gUXigg12kuEJx_ET6LQWaW7A2-blqvaxI-phqZd8CBlGftCM-8J7kXM-wS7ZP5IkXbVYMEMSWS5vbbc7faoOqDmIRbq-WoQD0QmSXUxA6A4kys6KVGYjth0O_aTXH3asfITsV6vWWSOdrQO73_cIYlUz97h7pUbj4Y3u4x3BctD-Wu0FG2MM8TyMaoTTgMfgymWwzeu0tpjBnfQ"/>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-white leading-tight">WaterSphere AI</span>
+<span class="bg-[#082C47] text-[#7DD3FC] font-mono text-[9px] px-1.5 py-0.5 rounded leading-none border border-tertiary-fixed-dim/30">bmc-v1</span>
+</div>
+<span class="text-[10px] text-tertiary-fixed-dim tracking-wide font-body-dense">BMC Mumbai Civic Portal</span>
+</div>
+</div>
+<!-- Telemetry badge & Profile -->
+<div class="flex items-center gap-1.5">
+<div class="flex items-center gap-1 bg-[#082C47] px-2 py-0.5 rounded-full border border-sky-400/30">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed animate-pulse"></span>
+<span class="text-[10px] font-label-caps text-sky-200">LIVE</span>
+</div>
+<div class="flex items-center bg-[#082C47] pl-1.5 pr-2 py-0.5 rounded-full border border-white/20">
+<span class="material-symbols-outlined text-[14px] text-sky-200 mr-1" data-icon="account_circle">account_circle</span>
+<span class="text-[10px] font-medium text-white font-body-dense">citizen_w1</span>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Ward Lock & Operational Date Strip -->
+<div class="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between">
+<!-- Locked Ward Badge -->
+<div class="flex items-center gap-1 bg-[#082C47] text-white px-2 py-1 rounded text-xs font-semibold shadow-inner border border-white/15">
+<span class="material-symbols-outlined text-[13px] text-amber-300" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<span class="tracking-tight text-[11px] font-headline-sm">Ward A — Colaba / Fort</span>
+</div>
+<!-- Date Context -->
+<div class="flex items-center gap-1 text-[11px] text-sky-100/90 font-mono">
+<span class="material-symbols-outlined text-[12px] opacity-80" data-icon="calendar_today">calendar_today</span>
+<span>2025-12-20 (Today)</span>
+</div>
+</div>
+</header>
+<!-- MAIN SCROLLABLE CONTENT CANVAS -->
+<main class="flex-1 p-3 space-y-3.5">
+<!-- 2. SHORTAGE / STATUS ADVISORY BANNER (Amber Moderate Example) -->
+<section class="bg-[#FFFBEB] border border-[#FDE68A] rounded-xl p-3 shadow-sm" role="alert">
+<div class="flex items-center justify-between mb-1.5">
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#FDF8E6] border border-[#F4E299]">
+<span class="w-2 h-2 rounded-full bg-[#C9A100]"></span>
+<span class="font-label-caps text-[11px] font-bold text-[#C9A100] tracking-wider uppercase">Moderate (WAR 0.93)</span>
+</div>
+<span class="text-[10px] font-mono text-amber-800 font-medium">IST 07:15 Advisory</span>
+</div>
+<p class="font-body-default text-[12px] leading-relaxed text-[#78350F] mb-2 font-normal">
+          Supply slightly reduced today due to maintenance on Tansa trunk feeder. Pressure expected lower in tail-end areas of Colaba Causeway.
+        </p>
+<div class="flex items-center justify-between pt-2 border-t border-[#FDE68A]/60 text-[11px]">
+<span class="text-amber-900/80 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-amber-700" data-icon="call">call</span>
+            Emergency Tanker: <strong>1916</strong>
+</span>
+<span class="text-[10px] text-amber-900/70 font-mono underline decoration-amber-400">BMC Water Central</span>
+</div>
+</section>
+<!-- 3. 'MY SUPPLY' CARD -->
+<section class="bg-surface-container-lowest border border-[#D8E2EC] rounded-xl p-3.5 shadow-sm space-y-3">
+<!-- Header -->
+<div class="flex items-center justify-between pb-2 border-b border-[#EDF2F7]">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary-container text-[18px]" data-icon="water_drop" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">My Ward Supply Telemetry</h2>
+</div>
+<span class="text-[10px] font-mono bg-surface-container-low text-primary-container px-2 py-0.5 rounded border border-[#D8E2EC]">Colaba Trunk</span>
+</div>
+<!-- Metric Grid -->
+<div class="grid grid-cols-2 gap-2.5">
+<!-- Allocation Metric -->
+<div class="bg-[#F8FAFC] border border-[#E2E8F0] p-2.5 rounded-lg">
+<div class="text-[11px] font-label-caps text-on-surface-variant font-medium">ALLOCATED TODAY</div>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-display-telemetry-mobile text-display-telemetry-mobile text-on-surface tabular-nums">110.0</span>
+<span class="font-data-unit text-data-unit text-[#5A6E7F]">ML</span>
+</div>
+<div class="text-[10px] text-[#D64545] font-medium flex items-center mt-0.5">
+<span class="material-symbols-outlined text-[11px] mr-0.5" data-icon="arrow_downward">arrow_downward</span>
+              -4.3% vs Target (115 ML)
+            </div>
+</div>
+<!-- Pressure Metric -->
+<div class="bg-[#F8FAFC] border border-[#E2E8F0] p-2.5 rounded-lg">
+<div class="text-[11px] font-label-caps text-on-surface-variant font-medium">TAIL-END PRESSURE</div>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="font-display-telemetry-mobile text-display-telemetry-mobile text-on-surface tabular-nums">1.25</span>
+<span class="font-data-unit text-data-unit text-[#5A6E7F]">bar</span>
+</div>
+<div class="text-[10px] text-on-surface-variant font-medium mt-0.5">
+              Target baseline: 1.40 bar
+            </div>
+</div>
+</div>
+<!-- Supply Window & Countdown -->
+<div class="bg-surface-container-low border border-surface-container-highest/60 rounded-lg p-2.5 text-xs">
+<div class="flex items-center justify-between text-on-surface font-medium">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[16px]" data-icon="schedule">schedule</span>
+<span>Pumping Window: 06:00 – 09:30 IST</span>
+</div>
+<span class="font-mono text-[11px] font-semibold text-primary">3.5 hrs</span>
+</div>
+<!-- Progress status -->
+<div class="mt-2 pt-2 border-t border-blue-200/50 flex items-center justify-between text-[11px]">
+<div class="flex items-center gap-1 text-[#006D38]">
+<span class="material-symbols-outlined text-[13px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-medium">Morning cycle finished</span>
+</div>
+<span class="text-on-surface-variant font-mono text-[10px]">Next: 18:30 IST</span>
+</div>
+</div>
+<!-- 3-Day Mini-Forecast Strip -->
+<div>
+<div class="text-[10px] font-label-caps text-on-surface-variant mb-1.5 font-bold tracking-wider">3-DAY WARD A PROJECTION</div>
+<div class="grid grid-cols-3 gap-1.5">
+<!-- Day 1 -->
+<div class="border border-[#F4E299] bg-[#FDF8E6]/60 rounded-lg p-1.5 text-center">
+<div class="text-[10px] font-mono text-on-surface-variant">Today (Dec 20)</div>
+<div class="text-xs font-bold text-on-surface tabular-nums">110 ML</div>
+<div class="text-[9px] font-bold text-[#C9A100]">WAR 0.93 Moderate</div>
+</div>
+<!-- Day 2 -->
+<div class="border border-[#BCE4CA] bg-[#EAF7EE]/60 rounded-lg p-1.5 text-center">
+<div class="text-[10px] font-mono text-on-surface-variant">Sat (Dec 21)</div>
+<div class="text-xs font-bold text-on-surface tabular-nums">114 ML</div>
+<div class="text-[9px] font-bold text-[#2E9E5B]">WAR 0.98 Safe</div>
+</div>
+<!-- Day 3 -->
+<div class="border border-[#BCE4CA] bg-[#EAF7EE]/60 rounded-lg p-1.5 text-center">
+<div class="text-[10px] font-mono text-on-surface-variant">Sun (Dec 22)</div>
+<div class="text-xs font-bold text-on-surface tabular-nums">115 ML</div>
+<div class="text-[9px] font-bold text-[#2E9E5B]">WAR 1.00 Normal</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Source / API Caption -->
+<div class="pt-1 flex items-center justify-between text-[9px] font-mono text-[#72777F]">
+<span>ENDPOINT: GET /api/supply-plan?ward=A&amp;date=2025-12-20</span>
+<span>SYNC: 2m ago</span>
+</div>
+</section>
+<!-- 4. 'WATER STRESS & HYDRAULIC ADEQUACY' CARD -->
+<section class="bg-surface-container-lowest border border-[#D8E2EC] rounded-xl p-3.5 shadow-sm space-y-3">
+<!-- Header -->
+<div class="flex items-center justify-between pb-2 border-b border-[#EDF2F7]">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="speed">speed</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Ward A Hydraulic Adequacy</h2>
+</div>
+<!-- Category pill -->
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#FDF8E6] text-[#C9A100] border border-[#F4E299]">
+            Moderate
+          </span>
+</div>
+<!-- Calibrated WAR Gauge Bar -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-baseline">
+<span class="text-[11px] font-label-caps text-on-surface-variant">WATER ADEQUACY RATIO (WAR)</span>
+<div class="flex items-baseline gap-1">
+<span class="text-lg font-bold font-telemetry-metric text-on-surface">0.93</span>
+<span class="text-[10px] text-on-surface-variant font-mono">/ 1.00 target</span>
+</div>
+</div>
+<!-- Visual Bar Track -->
+<div class="relative w-full h-3.5 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+<!-- Bands: 0 to 0.70 shortage, 0.70 to 0.85 high stress, 0.85 to 1.00 moderate/safe, >1.00 safe surplus -->
+<div class="absolute inset-0 flex">
+<div class="w-[58%] h-full bg-[#FBEEEE]"></div> <!-- 0.0 - 0.70 -->
+<div class="w-[13%] h-full bg-[#FCF2E6]"></div> <!-- 0.70 - 0.85 -->
+<div class="w-[12%] h-full bg-[#FDF8E6]"></div> <!-- 0.85 - 1.00 -->
+<div class="w-[17%] h-full bg-[#EAF7EE]"></div> <!-- 1.00 - 1.20 -->
+</div>
+<!-- Progress Fill to 0.93 (approx 77% of 1.2 scale) -->
+<div class="relative h-full bg-gradient-to-r from-amber-400 to-[#C9A100] rounded-r-full" style="width: 77.5%;">
+<div class="absolute right-0 top-0 bottom-0 w-1.5 bg-[#0B3D62] rounded-full shadow"></div>
+</div>
+</div>
+<!-- Threshold Marks (Ticks) -->
+<div class="flex justify-between text-[9px] font-mono text-[#5A6E7F] px-0.5">
+<span>0.00</span>
+<span class="text-[#D64545] font-semibold">0.70 Short</span>
+<span class="text-[#E07B00] font-semibold">0.85 Stress</span>
+<span class="text-[#2E9E5B] font-semibold">1.00 Target</span>
+<span>1.20</span>
+</div>
+</div>
+<!-- Quick Stats Matrix -->
+<div class="grid grid-cols-2 gap-2 pt-1">
+<div class="p-2 rounded-lg bg-surface-container-low/70 border border-[#D8E2EC]/70">
+<span class="text-[10px] font-label-caps text-on-surface-variant block">CONSUMPTION LPCD</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="text-base font-bold font-telemetry-metric text-on-surface">142</span>
+<span class="text-[10px] text-[#5A6E7F] font-data-unit">LPCD</span>
+</div>
+<span class="text-[9px] text-[#2E9E5B] font-semibold">105% of 135 std benchmark</span>
+</div>
+<div class="p-2 rounded-lg bg-surface-container-low/70 border border-[#D8E2EC]/70">
+<span class="text-[10px] font-label-caps text-on-surface-variant block">MALABAR HILL RES.</span>
+<div class="flex items-baseline gap-1 mt-0.5">
+<span class="text-base font-bold font-telemetry-metric text-on-surface">88.4</span>
+<span class="text-[10px] text-[#5A6E7F] font-data-unit">% Capacity</span>
+</div>
+<span class="text-[9px] text-primary font-medium">Head level steady</span>
+</div>
+</div>
+<div class="text-[9px] font-mono text-[#72777F] pt-1">
+          ENDPOINT: GET /api/water-stress?ward=A
+        </div>
+</section>
+<!-- 5. 'MY COMPLAINTS & GRIEVANCES' CARD -->
+<section class="bg-surface-container-lowest border border-[#D8E2EC] rounded-xl p-3.5 shadow-sm space-y-3">
+<!-- Card Header -->
+<div class="flex items-center justify-between pb-2 border-b border-[#EDF2F7]">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">My Complaints &amp; Grievances</h2>
+<p class="text-[11px] text-on-surface-variant font-body-dense">BMC Ward A Control Room Tracker</p>
+</div>
+<span class="bg-[#E0F0FF] text-primary text-[10px] font-mono px-2 py-0.5 rounded-full font-bold">2 Active / Hist</span>
+</div>
+<!-- Realistic Incident Rows -->
+<div class="space-y-2">
+<!-- Incident 1: Resolved -->
+<div class="p-2.5 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#FBFCFD] transition">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-mono text-[10px] font-bold text-primary-container">BMC-CMP-2025-9022</span>
+<h4 class="text-xs font-semibold text-on-surface mt-0.5">Horniman Circle 400mm CI main</h4>
+</div>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF7EE] text-[#2E9E5B] border border-[#BCE4CA]">
+                Resolved
+              </span>
+</div>
+<div class="flex items-center gap-2 mt-1.5 text-[10px] text-on-surface-variant">
+<span class="bg-gray-100 px-1.5 py-0.2 rounded font-mono">leakage</span>
+<span>Logged 09:15 IST</span>
+<span class="text-[#2E9E5B] font-medium font-mono">Met SLA in 3.2h</span>
+</div>
+</div>
+<!-- Incident 2: In-Progress -->
+<div class="p-2.5 rounded-lg border border-sky-200 bg-[#F8FAFC]">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-mono text-[10px] font-bold text-primary-container">BMC-CMP-2025-9045</span>
+<h4 class="text-xs font-semibold text-on-surface mt-0.5">Colaba Post Office Feeder</h4>
+</div>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-[#E0F2FE] text-[#0284C7] border border-sky-300">
+                In-progress
+              </span>
+</div>
+<div class="flex items-center justify-between mt-1.5 text-[10px]">
+<span class="bg-gray-100 text-on-surface-variant px-1.5 py-0.2 rounded font-mono">low-pressure</span>
+<span class="text-sky-700 font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]" data-icon="local_shipping">local_shipping</span>
+                Crew En Route (ETA 35m)
+              </span>
+</div>
+</div>
+</div>
+<!-- Action: Open Grievance Form Trigger -->
+<button class="w-full bg-primary-container hover:bg-[#082C47] text-white text-xs font-semibold py-2.5 px-3 rounded-lg flex items-center justify-center gap-1.5 shadow-sm active:scale-98 transition" id="toggleFormBtn" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="add_circle">add_circle</span>
+<span>+ File Grievance (Ward A Locked)</span>
+</button>
+<!-- Quick-Intake Complaint Form (Expandable) -->
+<div class="border border-[#D8E2EC] rounded-lg p-3 bg-surface-container-low/50 space-y-2.5" id="grievanceForm">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold text-primary font-headline-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="edit_note">edit_note</span>
+              Rapid Incident Registration
+            </span>
+<span class="text-[9px] text-[#0B3D62] font-mono bg-white px-1.5 py-0.5 rounded border border-[#D8E2EC]">
+              Ward: A (Colaba)
+            </span>
+</div>
+<!-- Incident Type -->
+<div>
+<label class="block text-[10px] font-label-caps text-on-surface-variant mb-1">INCIDENT CATEGORY (SCADA CLASSIFIED)</label>
+<select class="w-full text-xs bg-white border border-[#D8E2EC] rounded p-1.5 text-on-surface focus:ring-1 focus:ring-primary-container focus:outline-none font-body-dense">
+<option value="low-pressure">Low Pipeline Pressure (&lt;1.0 bar)</option>
+<option value="no-supply">No Supply / Dry Pipeline</option>
+<option value="leakage">Pipeline Burst / Surface Leakage</option>
+<option value="quality">Water Quality (&gt;5 NTU / Turbid / Odor)</option>
+<option value="billing">Water Billing / Meter Discrepancy</option>
+</select>
+</div>
+<!-- Locality -->
+<div>
+<label class="block text-[10px] font-label-caps text-on-surface-variant mb-1">STREET / LOCALITY (WARD A ONLY)</label>
+<input class="w-full text-xs bg-white border border-[#D8E2EC] rounded p-1.5 text-on-surface focus:ring-1 focus:ring-primary-container focus:outline-none placeholder:text-gray-400 font-body-dense" placeholder="e.g. Shahid Bhagat Singh Rd, Near Regal" type="text"/>
+</div>
+<!-- Consumer SAC Code -->
+<div>
+<label class="block text-[10px] font-label-caps text-on-surface-variant mb-1">SAC CONSUMER ID (BMC 10-DIGIT CODE)</label>
+<input class="w-full text-xs font-mono bg-[#F8FAFC] border border-[#D8E2EC] rounded p-1.5 text-on-surface focus:ring-1 focus:ring-primary-container focus:outline-none" type="text" value="SAC-A-400001-8842"/>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-[#006D38] hover:bg-[#005229] text-white text-xs font-medium py-2 rounded flex items-center justify-center gap-1" onclick="alert('Grievance logged successfully! BMC Ticket ID: BMC-CMP-2025-9051 generated. Ward A Field Officer alerted.')" type="button">
+<span class="material-symbols-outlined text-[14px]" data-icon="send">send</span>
+            Submit to Ward A Engineer Desk
+          </button>
+</div>
+</section>
+<!-- 6. CIVIC UTILITY FOOTER -->
+<footer class="pt-4 pb-2 text-center text-on-surface-variant space-y-1">
+<div class="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-primary-container">
+<span class="material-symbols-outlined text-[14px]" data-icon="account_balance">account_balance</span>
+<span>Brihanmumbai Municipal Corporation (BMC)</span>
+</div>
+<p class="text-[10px] text-on-surface-variant">Water Operations &amp; Hydraulic Engineer Department</p>
+<div class="flex items-center justify-center gap-3 text-[10px] font-mono text-[#5A6E7F] pt-1">
+<span>Helpline: <strong>1916</strong></span>
+<span>•</span>
+<span>SCADA Protocol: IEC 60870-5-104</span>
+</div>
+</footer>
+</main>
+<!-- 7. PERSISTENT MOBILE BOTTOM NAVIGATION BAR -->
+<!-- 44px min touch target, sticky bottom dock -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-[390px] mx-auto bg-surface-container-lowest border-t border-[#D8E2EC] h-14 flex items-stretch justify-around px-2 z-50 shadow-[0_-2px_6px_rgba(11,61,98,0.06)]">
+<!-- Tab 1: Schedule (ACTIVE) -->
+<a class="flex-1 flex flex-col items-center justify-center text-primary-container font-bold border-t-2 border-primary-container -mt-[1px] transition-colors py-1" href="#schedule">
+<span class="material-symbols-outlined text-[20px]" data-icon="schedule" style="font-variation-settings: 'FILL' 1;">schedule</span>
+<span class="text-[10px] font-label-caps mt-0.5 tracking-tight">Schedule</span>
+</a>
+<!-- Tab 2: Alerts (WITH RED BADGE) -->
+<a class="flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors py-1 relative" href="#alerts">
+<div class="relative">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+<span class="absolute -top-1 -right-1.5 w-3.5 h-3.5 bg-error text-white font-mono text-[9px] rounded-full flex items-center justify-center font-bold">1</span>
+</div>
+<span class="text-[10px] font-label-caps mt-0.5 tracking-tight">Alerts</span>
+</a>
+<!-- Tab 3: Complaints -->
+<a class="flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors py-1" href="#complaints">
+<span class="material-symbols-outlined text-[20px]" data-icon="report_problem">report_problem</span>
+<span class="text-[10px] font-label-caps mt-0.5 tracking-tight">Grievance</span>
+</a>
+<!-- Tab 4: Account / Profile -->
+<a class="flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors py-1" href="#account">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+<span class="text-[10px] font-label-caps mt-0.5 tracking-tight">Ward A Profile</span>
+</a>
+</nav>
+</div>
+<!-- Micro-interaction script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('toggleFormBtn');
+      const form = document.getElementById('grievanceForm');
+      
+      // Smooth toggle for grievance form intake
+      toggleBtn.addEventListener('click', () => {
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+  </script>
+</body></html>

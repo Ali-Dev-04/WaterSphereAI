@@ -1,0 +1,20 @@
+# Secrets / local state — never commit.
+.env
+opencode.json
+backups/
+*.sql
+# Python
+__pycache__/
+*.pyc
+.venv/
+.keras/
+# Frontend
+frontend/node_modules/
+frontend/dist/
+# Data artifacts (regenerable via scripts/)
+data/processed/
+models/*.keras
+models/*.pkl
+# OS / editor
+.DS_Store
+*.log

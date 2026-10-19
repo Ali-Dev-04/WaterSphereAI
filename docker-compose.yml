@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-watersphere}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpass}
+      POSTGRES_DB: ${POSTGRES_DB:-watersphere}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-watersphere}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-watersphere}:${POSTGRES_PASSWORD:-devpass}@db:5432/${POSTGRES_DB:-watersphere}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-change-in-prod}
+      JWT_EXPIRE_MIN: "60"
+      WAR_SAFE: ${WAR_SAFE:-1.0}
+      WAR_MODERATE: ${WAR_MODERATE:-0.85}
+      WAR_HIGH: ${WAR_HIGH:-0.70}
+      SUPPLY_RESERVE_PCT: ${SUPPLY_RESERVE_PCT:-0.05}
+      SUPPLY_OPTIMIZER: ${SUPPLY_OPTIMIZER:-rule}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/code/backend:ro
+      - ./models:/code/models:ro
+      - ./data:/code/data:ro
+      - ./alembic:/code/alembic
+      - ./alembic.ini:/code/alembic.ini:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    command: bash -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  pgdata:
