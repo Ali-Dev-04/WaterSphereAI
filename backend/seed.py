@@ -9,7 +9,10 @@ from app import models
 from app.auth import hash_password
 from app.database import SessionLocal
 
-RAW = Path(os.environ.get("SEED_RAW_DIR", "/code/data/raw"))
+RAW = Path(os.environ.get(
+    "SEED_RAW_DIR",
+    str(Path(__file__).resolve().parents[1] / "data" / "raw"),
+))
 
 
 def upsert_wards(db, path):
