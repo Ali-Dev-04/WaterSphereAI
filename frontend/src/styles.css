@@ -1068,3 +1068,68 @@ table.data tfoot td {
   table.data { min-width: 560px; }
   .kpis { grid-template-columns: 1fr 1fr; }
 }
+
+/* — Guest complaint form (login page, mode: guest) — */
+.login-form textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(125, 211, 252, 0.25) !important;
+  border-radius: 10px !important;
+  color: #f8fafc !important;
+  padding: 11px 14px !important;
+  font: inherit !important;
+  resize: vertical;
+  min-height: 44px;
+}
+.login-form textarea:focus-visible { outline: 2px solid rgba(56, 189, 248, 0.5); }
+.login-form input[type="file"] {
+  width: 100%;
+  color: #cbd5e1;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed rgba(125, 211, 252, 0.3);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+.guest-done { text-align: center; padding: 18px 0 6px; }
+.guest-done h2 { color: #7dd3fc; margin: 0 0 10px; }
+.refchip {
+  font-family: ui-monospace, monospace;
+  font-size: 26px;
+  font-weight: 800;
+  color: #082c47;
+  background: #7dd3fc;
+  border-radius: 10px;
+  display: inline-block;
+  padding: 8px 22px;
+  margin: 8px 0 14px;
+  letter-spacing: 0.04em;
+}
+
+/* — Complaint detail modal (admin) — */
+.modal-veil {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(4, 16, 28, 0.72);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal {
+  background: #0d2b42; color: #f1f5f9;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  width: min(640px, 96vw); max-height: 88vh; overflow: auto; padding: 22px 24px;
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.modal-head h2 { margin: 0; font-size: 20px; color: #7dd3fc; }
+.detail-grid { display: grid; grid-template-columns: 130px 1fr; gap: 8px 14px; margin: 8px 0 0; }
+.detail-grid dt { color: #9bb3c7; font-size: 12.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; padding-top: 2px; }
+.detail-grid dd { margin: 0; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+.detail-grid .photo {
+  display: block; max-width: 100%; max-height: 340px;
+  border-radius: 10px; border: 1px solid rgba(125, 211, 252, 0.35);
+}
+@media (max-width: 768px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .modal { padding: 16px; }
+}

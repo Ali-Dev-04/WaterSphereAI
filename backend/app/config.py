@@ -23,5 +23,8 @@ class Settings(BaseSettings):
     war_moderate: float = 0.85
     war_high: float = 0.70
 
+    # Guest complaint photo uploads (relative to working dir: repo/host, /code in container).
+    upload_dir: str = "uploads"
+
 
 settings = Settings()

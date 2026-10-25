@@ -102,9 +102,16 @@ class SupplyPlan(Base):
 class Complaint(Base):
     __tablename__ = "complaints"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    # Signed-in filer; None for guest reports (POST /api/complaints/public).
+    user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"))
     ward_id: Mapped[str] = mapped_column(String(16), ForeignKey("wards.ward_id"), index=True)
     type: Mapped[str] = mapped_column(String(32))
+    # Guest-only fields (nullable so existing citizen complaints stay valid).
+    reporter_name: Mapped[str | None] = mapped_column(String(120))
+    address: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
+    # Server-generated filename inside the uploads dir (never user-controlled).
+    photo_path: Mapped[str | None] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(16), default="Filed")
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
     updated_at: Mapped[dt.datetime] = mapped_column(

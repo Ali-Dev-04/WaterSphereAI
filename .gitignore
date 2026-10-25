@@ -3,6 +3,7 @@
 opencode.json
 backups/
 *.sql
+uploads/
 # Python
 __pycache__/
 *.pyc

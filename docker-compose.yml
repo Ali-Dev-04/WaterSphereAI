@@ -34,6 +34,7 @@ services:
       - ./backend:/code/backend:ro
       - ./models:/code/models:ro
       - ./data:/code/data:ro
+      - ./uploads:/code/uploads
       - ./alembic:/code/alembic
       - ./alembic.ini:/code/alembic.ini:ro
     depends_on:

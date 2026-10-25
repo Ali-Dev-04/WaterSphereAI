@@ -122,6 +122,95 @@ export function GovBar() {
   );
 }
 
+const TYPES = ["no-supply", "low-pressure", "leakage", "quality", "billing"];
+
+function GuestComplaint({ onBack }) {
+  const [pubWards, setPubWards] = useState([]);
+  const [ward, setWard] = useState("");
+  const [name, setName] = useState("");
+  const [addr, setAddr] = useState("");
+  const [type, setType] = useState("no-supply");
+  const [desc, setDesc] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [ref, setRef] = useState(null);
+  useEffect(() => {
+    api.get("/api/public/wards").then((r) => {
+      setPubWards(r.data);
+      if (r.data.length) setWard((w) => w || r.data[0].ward_id);
+    }).catch(() => setError("Could not load the ward list — check that the API is running."));
+  }, []);
+
+  function validate() {
+    if (name.trim().length < 2) return "Please enter your full name (min 2 characters).";
+    if (!ward) return "Please select the incident ward.";
+    if (addr.trim().length < 5) return "Please describe the incident address (min 5 characters).";
+    if (!photo) return "An incident photo is required (JPEG, PNG or WEBP up to 5 MB).";
+    if (photo && photo.size > 5 * 1024 * 1024) return "Photo is larger than 5 MB.";
+    if (desc.trim().length < 10) return "Please describe the incident (min 10 characters).";
+    return "";
+  }
+
+  async function submit(e) {
+    e.preventDefault();
+    setError("");
+    const v = validate();
+    if (v) { setError(v); return; }
+    setBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("ward_id", ward);
+      fd.append("type", type);
+      fd.append("reporter_name", name);
+      fd.append("address", addr);
+      fd.append("description", desc);
+      fd.append("photo", photo);
+      const r = await api.post("/api/complaints/public", fd);
+      setRef(r.data);
+    } catch (err) {
+      setError(err.response?.data?.detail || "Submission failed — please retry.");
+    }
+    setBusy(false);
+  }
+
+  if (ref) {
+    return (
+      <div className="guest-done">
+        <h2>Complaint received ✓</h2>
+        <p>Your reference number:</p>
+        <div className="refchip">#{ref.id}</div>
+        <p className="muted">Ward {ref.ward_id} · {ref.type} · filed {new Date(ref.created_at).toLocaleString()}.<br />
+          Track progress by citing <b>#{ref.id}</b> at your ward office.</p>
+        <button className="ghost" onClick={onBack}>Back to sign-in</button>
+      </div>
+    );
+  }
+  return (
+    <form onSubmit={submit} noValidate>
+      <div className="field"><label>Full name</label>
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name of the person reporting" /></div>
+      <div className="field"><label>Incident ward</label>
+        <select value={ward} onChange={(e) => setWard(e.target.value)}>
+          {pubWards.map((w) => <option key={w.ward_id} value={w.ward_id}>{w.ward_id} — {w.name}</option>)}
+        </select></div>
+      <div className="field"><label>Incident address (required)</label>
+        <textarea rows={2} value={addr} onChange={(e) => setAddr(e.target.value)} placeholder="Street, landmark, house/plot no. inside the selected ward" /></div>
+      <div className="field"><label>Incident type</label>
+        <select value={type} onChange={(e) => setType(e.target.value)}>
+          {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+        </select></div>
+      <div className="field"><label>Incident photo (required · JPEG/PNG/WEBP ≤ 5 MB)</label>
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
+        {photo && <span className="muted"> {photo.name}</span>}</div>
+      <div className="field"><label>Incident description (required)</label>
+        <textarea rows={4} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What happened, when it started, severity, how many households are affected…" /></div>
+      {error && <div className="error">{error}</div>}
+      <button className="primary" type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit complaint →"}</button>
+    </form>
+  );
+}
+
 function Login({ onLogin }) {
   const [mode, setMode] = useState("signin");
   const [username, setUsername] = useState("");
@@ -192,11 +281,14 @@ function Login({ onLogin }) {
           <div className="meta"><span className="verchip">bmc-v1</span><span className="muted" style={{ color: "#9bb3c7" }}>Official use only</span></div>
         </div>
         <div className="login-form">
-          <h2>{mode === "signin" ? <>Municipal sign-in <span className="sso">SCADA SSO v2</span></> : "Citizen registration"}</h2>
+          <h2>{mode === "signin" ? <>Municipal sign-in <span className="sso">SCADA SSO v2</span></>
+            : mode === "register" ? "Citizen registration" : "Report a water issue — no account"}</h2>
           <p className="muted">{mode === "signin"
             ? "Use your water-board account to continue."
-            : "Create a citizen account locked to your ward."}</p>
-          {error && <div className="error"><b>{mode === "signin" ? "Authentication notice" : "Registration notice"}</b><br />{error}</div>}
+            : mode === "register"
+              ? "Create a citizen account locked to your ward."
+              : "Guest reports need no account — a photo is required and your report goes straight to the ward office."}</p>
+          {error && <div className="error"><b>{mode === "signin" ? "Authentication notice" : mode === "register" ? "Registration notice" : "Submission notice"}</b><br />{error}</div>}
           {mode === "signin" ? (
           <form onSubmit={submit}>
             <div className="field"><label>Officer username / Citizen ID</label>
@@ -205,7 +297,7 @@ function Login({ onLogin }) {
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" placeholder="••••••••" /></div>
             <button className="primary" type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in →"}</button>
           </form>
-          ) : (
+          ) : mode === "register" ? (
           <form onSubmit={register}>
             <div className="field"><label>Citizen ID</label>
               <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" placeholder="Choose a citizen ID" /></div>
@@ -217,10 +309,15 @@ function Login({ onLogin }) {
               </select></div>
             <button className="primary" type="submit" disabled={busy}>{busy ? "Creating…" : "Create citizen account →"}</button>
           </form>
+          ) : (
+          <GuestComplaint onBack={() => { setError(""); setMode("signin"); }} />
           )}
           <p className="muted" style={{ marginTop: 12 }}>
             {mode === "signin" ? (
-              <>New here? <a href="#register" onClick={(e) => { e.preventDefault(); setError(""); setMode("register"); }}>Create a citizen account</a></>
+              <>
+                New here? <a href="#register" onClick={(e) => { e.preventDefault(); setError(""); setMode("register"); }}>Create a citizen account</a>
+                {" · "}<a href="#guest" onClick={(e) => { e.preventDefault(); setError(""); setMode("guest"); }}>Report a water issue without sign-in</a>
+              </>
             ) : (
               <>Have an account? <a href="#signin" onClick={(e) => { e.preventDefault(); setError(""); setMode("signin"); }}>Back to sign-in</a></>
             )}

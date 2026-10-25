@@ -45,11 +45,16 @@ class ComplaintIn(BaseModel):
 
 class ComplaintOut(BaseModel):
     id: int
-    user_id: int
+    user_id: int | None
     ward_id: str
     type: str
     status: str
     created_at: dt.datetime
+    # Guest-report fields (None for authenticated citizen complaints).
+    reporter_name: str | None = None
+    address: str | None = None
+    description: str | None = None
+    has_photo: bool = False
 
 
 class StatusIn(BaseModel):

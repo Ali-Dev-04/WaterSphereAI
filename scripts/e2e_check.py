@@ -12,13 +12,14 @@ Middle Vaitarna, Vihar, Tulsi.
 
 import base64
 import json
+import os
 import sys
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
 
-BASE = "http://localhost:8000"
+BASE = os.environ.get("WS_E2E_BASE", "http://localhost:8000")
 FAILURES: list[str] = []
 
 # BMC ward/reservoir constants
@@ -43,6 +44,36 @@ def call(method: str, path: str, token: str | None = None, body: dict | None = N
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method,
                                  headers={"Content-Type": "application/json"})
+    if token:
+        req.add_header("Authorization", f"Bearer {token}")
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            raw = r.read().decode()
+            return r.status, json.loads(raw) if raw else None
+    except urllib.error.HTTPError as e:
+        try:
+            return e.code, json.loads(e.read().decode() or "null")
+        except Exception:
+            return e.code, None
+
+
+def call_multipart(path: str, fields: dict, token: str | None = None,
+                   filename: str = "photo.png",
+                   photo: bytes | None = None) -> tuple[int, object]:
+    """Low-effort multipart/form-data POST for the guest complaint endpoint."""
+    boundary = "wse2eformboundary7f3a"
+    if photo is None:  # 1x1 transparent PNG
+        photo = base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
+    parts = []
+    for k, v in fields.items():
+        parts.append(f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode())
+    parts.append((f"--{boundary}\r\nContent-Disposition: form-data; name=\"photo\"; "
+                  f"filename=\"{filename}\"\r\nContent-Type: image/png\r\n\r\n").encode() + photo + b"\r\n")
+    parts.append(f"--{boundary}--\r\n".encode())
+    req = urllib.request.Request(
+        BASE + path, data=b"".join(parts), method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
     if token:
         req.add_header("Authorization", f"Bearer {token}")
     try:
@@ -121,6 +152,29 @@ def main() -> None:
     check("citizen sees resolution",
           code == 200 and any(c["id"] == cid and c["status"] == "Resolved" for c in mine2),
           f"got {code}")
+
+    # ---------- J5: guest complaint (no account) with photo ----------
+    code, g = call_multipart("/api/complaints/public", {
+        "ward_id": WARD_A, "type": "e2e-guest", "reporter_name": "e2e Guest",
+        "address": "Test lane 4", "description": "e2e guest round-trip report."})
+    check("guest complaint 201 (no token, photo)",
+          code == 201 and g["user_id"] is None and g["reporter_name"] == "e2e Guest"
+          and g["has_photo"], f"got {code}")
+    gid = g["id"] if code == 201 else None
+    code, _ = call("GET", "/api/complaints", None)  # anonymous listing forbidden
+    check("anonymous complaint listing 401", code == 401, f"got {code}")
+    code, gl = call("GET", "/api/complaints", admin)
+    check("admin sees guest complaint",
+          code == 200 and any(c["id"] == gid and c["ward_id"] == WARD_A for c in gl),
+          f"got {code}")
+    code, _ = call("GET", f"/api/complaints/{gid}/photo", None)
+    check("photo endpoint unauth 401", code == 401, f"got {code}")
+    code, _ = call("GET", f"/api/complaints/{gid}/photo", cit)
+    check("photo endpoint citizen 403", code == 403, f"got {code}")
+    code, _ = call_multipart("/api/complaints/public", {
+        "ward_id": "ZZ", "type": "e2e-guest", "reporter_name": "e2e Guest",
+        "address": "Test lane 4", "description": "unknown-ward probe."})
+    check("guest unknown ward 404", code == 404, f"got {code}")
 
     # ---------- J4: supporting endpoints ----------
     for path, q in [("/api/leakage-risk", {"ward_id": WARD_A, "date_from": "2025-11-01", "date_to": TEST_DATE}),
