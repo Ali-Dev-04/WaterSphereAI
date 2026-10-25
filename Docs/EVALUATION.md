@@ -54,7 +54,7 @@ exclude it from production serving until data volume grows ~10×.
 - Ward-level 1/3/7-day forecasts: YES — live `/api/forecast`, MAPE ~3.3%, R² ≥ 0.99.
 - Reservoir-aware recommendations: YES — `/api/supply-plan` never over-allocates (conservation asserted in e2e).
 - Early stress detection: YES as an engine (canonical 500/450 → WAR 0.90 Moderate reproduces); see §5 for data limits.
-- Product journey (admin → citizen → complaint round-trip): YES — e2e 31/31 + pytest 11/11 on bmc-v1.
+- Product journey (admin → citizen → complaint round-trip): YES — verified live; current baseline **e2e 38/38 + pytest 28/28** (counts as of 2026-10-25; 31/31 + 11/11 at the time of this report).
 - Onboarding from docs: YES — `Docs/` + `Context.md` current.
 
 ## 5. WAR calibration (P0-2)

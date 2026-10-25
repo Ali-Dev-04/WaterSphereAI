@@ -12,8 +12,17 @@ This file governs how any agent (AI model, developer, contributor) works in this
 
 If these conflict, `Context.md` + explicit user instruction win. Flag the conflict in `Context.md`.
 
-## 2. Project State
-Pre-development. No `backend/`, `frontend/`, `mobile/`, `ml/`, or DB exists. Do not assume code exists — verify with `read`/`glob`/`grep` before claiming anything.
+## 2. Project State (verified 2026-10-25)
+**Implemented and running locally through Phase 14.** Do not assume otherwise, but still verify before claiming specifics.
+
+- `backend/` — FastAPI, 22 API operations, 11-table PostgreSQL schema, Alembic head `c8f2a6b1e4d9`, JWT + ward-scoped RBAC, guest complaints with photo upload.
+- `frontend/` — React 18 + Vite (plain JSX), public landing page, sign-in/registration/guest-report card, role-aware tabs, plain-CSS light municipal theme.
+- `scripts/` — data generation/validation, preprocessing, features, train, evaluate, `e2e_check.py`, drift + backup.
+- `models/` — 12 trained artifacts + `manifest.json`/`active.json`; `data/` — bmc-v1 dataset and reports.
+- `mobile/` — **does not exist** (Flutter app is Phase 11, deferred).
+- Verification baseline: `pytest backend/tests` **28/28**, `scripts/e2e_check.py` **38/38**, `npm run build` PASS, CI green (backend + ml-smoke + frontend).
+
+Remaining work: staging deploy (Phase 15), Flutter app, authoritative ward GIS, mobile-width UI sweep, and the open WAR availability-basis decision.
 
 ## 3. How to Work
 - **Verify before synthesizing.** Inspect files yourself. Never present guesses as facts. If you checked, say what you checked.

@@ -3,8 +3,9 @@
 > **Agent instruction:** this file keeps itself updated. Append a row to `Change Log` (and update `Current Stage` / `Next Steps` if they changed) on **every** task that touches code, schema, models, thresholds, decisions, or docs. Append-only — never rewrite history. See `Agents.md §5`.
 
 ## Current Stage
-- **Stage:** 14 — bmc-v1 fully validated + live (12 models retrained, 31/31 e2e, citizen sign-up shipped); deploy next.
+- **Stage:** 14 complete — bmc-v1 validated + live, guest complaints + public landing + light municipal UI shipped; **deploy next**.
 - **Last Updated:** 2026-10-25
+- **Verification (2026-10-25):** `pytest backend/tests` **28/28**, `scripts/e2e_check.py` **38/38** (live fallback stack), `npm run build` PASS, CI run on `160bb8b` **success** (backend + ml-smoke + frontend). Browser click-through done at :5173 including guest complaint → admin ward filter.
 - **Active municipality / dataset:** BMC Mumbai 24 wards (A–T incl. F/N,F/S…), bmc-v1 2023-01-01..2025-12-31 daily (26304 consumption, 7672 readings, 7 reservoirs); `validate_data.py` PASS. Synthetic-v1 fully superseded.
 - **Active model per horizon:** 1d → xgboost, 3d → gru, 7d → gru (val-RMSE selection, test MAPE 3.2–3.4%, R² ≥0.990). Note: xgb slot = sklearn HGB fallback (libomp missing on host).
 
@@ -16,28 +17,35 @@
 | 5 Model Validated (comparison table) | done on bmc-v1 (test single-pass, active: 1d xgb, 3d/7d gru; MAPE 3.2–3.4%, R² ≥0.990) |
 | 6+7 Backend MVP (forecast + stress live) | done (both endpoints live + tested) |
 | 8 Supply Plan Ready | done (allocator verified live, alerts firing) |
-| 9 Frontend MVP (real data) | done (build + CORS + contract verified; browser click-through pending) |
-| 13 Integration Complete | re-done on bmc-v1 (pytest 11/11 + scripts/e2e_check.py 31/31, Oct-05) |
+| 9 Frontend MVP (real data) | done (build + CORS + contract verified; browser click-through completed 2026-10-25: landing → login → all tabs, light theme, no console errors except signed-out `/api/wards` 401) |
+| 13 Integration Complete | done on bmc-v1 (pytest **28/28** + `scripts/e2e_check.py` **38/38**, re-verified 2026-10-25; includes guest-complaint + photo RBAC cases) |
 | 15 Staging Deploy | not started |
 
 ## Confirmed Decisions
-- Stack: FastAPI + PostgreSQL + React/Recharts-or-Plotly + Flutter + Leaflet/OSM + JWT + FCM + Render/Netlify (from source docs).
+- Stack: FastAPI + PostgreSQL + SQLAlchemy 2/Alembic + React 18/Vite + Recharts + Leaflet/OSM + JWT + Flutter (pending) + Render/Netlify (deploy pending).
 - Horizons 1/3/7-day; metrics MAE/RMSE/MAPE/R²; stress categories Safe/Moderate/High/Shortage via WAR.
-- Rainfall/weather out of scope; LP/MILP Advanced-only; leakage supervised only if labels found.
+- Rainfall/weather out of scope; leakage supervised only if labels found (unsupervised IsolationForest ships). LP allocator is an optional engine beside the rule-based default (`SUPPLY_OPTIMIZER`).
 - 2026-09-26 locked: generic 5 wards; 2yr daily synthetic-v1 (seed 42); all 4 models MVP; TF/Keras; per-horizon models (12 total); provisional WAR Safe ≥1.0 / Moderate 0.85–1.0 / High 0.7–0.85 / Shortage <0.7.
 - 2026-09-26: dashboard styling = plain CSS with Design_System tokens (no Tailwind/MUI); Recharts for charts; axios client with VITE_API_URL (default http://localhost:8000).
+- 2026-10-05: citizen accounts = self-registration forced to `citizen` role, ward locked at sign-up; admins provisioned only. No OTP yet (open decision).
+- 2026-10-25: guest complaints = `complaints.user_id` nullable + photo mandatory (JPEG/PNG/WEBP ≤5 MB, magic-byte validated), admin-only photo route, 5/min/IP public rate limit.
+- 2026-10-25: all user-visible configuration comes from `GET /api/meta` (ward count, dataset window, WAR bands, model version) — no hardcoded UI numbers.
+- 2026-10-25: UI direction = light municipal/utility theme (no glows/gradients/backdrop filters); signed-out entry is a public landing page.
 
 ## Open Decisions (remaining)
-Hosting tiers + Postgres provider; GIS authoritative source; deadline/team; CI/CD+monitoring; citizen account model; rule vs LP/MILP (Advanced); leakage labels; CSS framework; model hosting (bundled vs pulled).
+Hosting tiers + Postgres provider; GIS authoritative source; deadline/team; observability (Sentry/etc.); refresh tokens / OTP; leakage labels; model hosting (bundled vs pulled); **WAR availability basis — availability is gross `available_water_ml` split equally among each reservoir's serving wards, producing WAR ~10²–10³ and all-Safe classification (documented in `EVALUATION.md §5`); decide whether to keep absolute bands or switch to servable-share availability**.
 
 ## Corrections / Constraints (obey across turns)
 - 2026-09-26: all project docs live in `Docs/` (user-requested move). Resolve `Docs/X` references inside moved files as same-folder `X` until refs are cleaned up.
+- 2026-10-25: wards are **24** as configured in the DB (briefings that say 25 are outdated); never hardcode ward counts in UI — read `/api/meta` or the wards endpoints.
+- 2026-10-25: no fake integration badges/labels in the UI (e.g. "SCADA SSO", "PILOT-PROD"); dev credentials live only in README/demo docs.
 
 ## Next Steps
-1. P0-5: browser click-through (user walkthrough in progress at :5173).
-2. P0-4: Phase 15 staging deploy (Render API + DB, Netlify dashboard) + runbook.
-3. P0-6: Phase 16 evaluation report under `Docs/`.
+1. P0-4: Phase 15 staging deploy (Render API + DB, Netlify dashboard) + runbook.
+2. Re-verify on the Docker stack when the daemon is back (`docker compose build api`, `up -d`, `alembic upgrade head` → `c8f2a6b1e4d9`).
+3. Decide the WAR availability basis (gross equal-split storage vs servable share — see `EVALUATION.md §5`).
 4. P0-3: Phase 11 Flutter citizen app whenever you're ready.
+5. Optional: add e2e to CI against an ephemeral Postgres service.
 
 ## Change Log
 | Date | Scope | What changed + files touched | Stage before → after | Open items |
@@ -87,3 +95,5 @@ Hosting tiers + Postgres provider; GIS authoritative source; deadline/team; CI/C
 | 2026-10-25 | Guest-complaint CI + local confirm | CI: first guest run failed only on missing `httpx2` (test-only starlette.testclient dep — present locally, absent in CI pip line); added to ci.yml install → run on `9b9572a` **success** (backend 28/28 + ml-smoke + frontend). Local Docker-stack re-verify pending daemon (fallback stack fully verified instead) | 14 → 14 (CI green incl. guest tests) | Docker-stack re-verify; click-through; deploy, Flutter |
 | 2026-10-07 | Bold transparent glassmorphism UI upgrade | Upgraded overall UI to bold transparent look: dark glassmorphism cards (`backdrop-filter: blur(20px)`), deep ocean radial mesh background, glowing neon badges (Safe, Moderate, High, Shortage), translucent sticky masthead & context bars, Outfit & JetBrains Mono typography, dark Leaflet map layer integration, Recharts dark theme customization. Build `npm run build` PASS (0 errors) | 14 → 14 (UI upgraded) | Deploy, Flutter, click-through |
 | 2026-10-25 | Landing page + light utility UI revamp (user-requested, clarified 25-Oct) | **Landing**: new signed-out entry screen `Landing.jsx` (hero, 3-step Forecast/Stress/Plan, stat chips, CTAs) shown before login; sign-in card reachable via CTA/`Back to home`, guest CTA opens the guest form directly. **De-AI theme**: full `styles.css` rewrite to light utility palette (bg #f4f6f9 / surface #fff / ink #16283a / water-blue #0b5fa5); removed glow shadows, radial/linear decorative gradients, backdrop-filters, neon badges; light Leaflet (invert filter gone), light Recharts, white tables w/ sticky headers, dark-navy gov strip + login panel only. **Hardcodes**: new public `GET /api/meta` (model_version from `models/manifest.json` w/ config fallback, ward_count from DB, date window from consumption min/max, WAR bands from settings) now drives ward count, date input `min`/`max` + default date, WAR band copy, model-version chips; deleted fake `SCADA SSO v2` + `PILOT-PROD` chips and `MCGM` capacity hardcodes. **Login**: real secondary button "Report a complaint without sign-in" under an "or" divider (was a text link). **Complaints**: `others` added to incident types (guest + admin filing), with hint + min-25-char description rule for guests. Verified in browser: landing → guest CTA → submit (ref #3, Ward B, others, photo) → admin sees it in ward-B filter + modal photo; `npm run build` PASS; `/api/meta` e2e check added | 14 → 14 (UI/landing delivered) | Note: pre-existing `/api/gis`+stress `war` values are ~10²–10³ (e.g. 4080.458 for ward A) though displayed as Safe — likely available-water unit mismatch, needs owner decision; Docker-stack re-verify; CI confirm |
+| 2026-10-25 | Documentation sync pass (user-requested) | Audited all 15 docs against live code/API/tests and corrected drift: `Context.md` stage/gates/decisions/next-steps; `TODO.md` status date, phases 9/12/13, P0-5 click-through done, P2 CI partially done + WAR-units residual; `Architecture.md` API surface (22 operations incl. `/api/meta`, public complaints + photo), 11 tables + guest columns, current-state §7; `Design_System.md` actual light tokens, top-nav layout, landing/guest/modal components, CSS decision closed; `Security.md` implemented auth/RBAC/upload/rate-limit status + remaining gaps; `Testing.md` real commands/counts (28 pytest, 38 e2e, no FE unit tests yet); `APP_WORKFLOW.md` endpoints, migrations, test counts, `WS_E2E_BASE`; `demo.md` landing flow, guest demo, default date 2025-12-31, verification counts, light design; `README.md` endpoint list + 38-check e2e; `PRD.md`/`IMPLEMENTATION_PLAN.md`/`data.md` stale "pre-development/no data" metadata; `Project_Overview.md` current-state block; `Agents.md` project-state section; `Code_style.md` JSX/plain-CSS reality. No code changed | 14 → 14 (docs in sync with code) | Docker-stack re-verify; WAR units; deploy; Flutter |
+| 2026-10-25 | WAR scale clarification (found during doc audit) | Re-read `Docs/EVALUATION.md §5` and `backend/app/inference.py::ward_availability`: the large WAR values are **explained, not unexplained** — availability is each reservoir's gross `available_water_ml`, split equally among the wards it serves, so ward WAR spans ≈2.9–4000 (median ≈184) and absolute bands 1.0/0.85/0.70 classify every BMC ward Safe. Daily-yield framing (Σ 4273 MLD vs ≈3300 ML demand) confirms structural surplus in-window. Docs now consistently call this a **calibration/owner decision** (servable-share availability vs absolute bands) rather than a suspected unit bug; engine correctness remains proven by the canonical 500/450 → 0.90 test | 14 → 14 (docs corrected) | Decide availability basis before the WAR gauge is demo-critical |

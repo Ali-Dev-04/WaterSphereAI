@@ -1,6 +1,16 @@
 # data.md — Core & Supporting Datasets for WaterSphere AI
 
-Source: derived from `Docs/IMPLEMENTATION_PLAN.md §1.11, Phase 1–3` + Development Context PDF `§4,6,17,20,22,28`. Stage 0: no dataset exists yet — this file defines what to collect/keep handy.
+Source: derived from `Docs/IMPLEMENTATION_PLAN.md §1.11, Phase 1–3` + Development Context PDF `§4,6,17,20,22,28`. This file started as a collection brief for a dataset that did not exist yet; **as of 2026-10-25 the active dataset exists and is validated** — see the status block below.
+
+## 0a. Current dataset state (2026-10-25)
+- **Active dataset:** `bmc-v1` — BMC Mumbai, **24 wards**, daily **2023-01-01 → 2025-12-31**.
+- **Volume:** 26,304 consumption rows, 7,672 reservoir readings, 7 reservoirs (Bhatsa 976 MCM … Vihar 9.2 MCM), population rows per ward.
+- **Validation:** `python3 scripts/validate_data.py` → `PASS`; reports in `data/quality_report.md` and `data/eda_report.md`.
+- **Splits:** chronological (no shuffle) with cuts recorded in `data/split_meta.json`; the test set was touched once for `data/comparison_table.md`.
+- **Provenance:** data is real-style/synthetic-derived and labeled `bmc-v1` throughout the app; synthetic-v1 is fully superseded.
+- **WAR framing:** ward WAR uses each reservoir's **gross `available_water_ml` split equally among its serving wards**, so values run ≈2.9–4000 (median ≈184) and all BMC ward-days classify Safe; daily yield (4273 MLD) exceeds demand (≈3300 ML) in-window. This is documented in `EVALUATION.md §5`; choosing servable-share availability is an open calibration decision.
+
+The rest of this document remains the specification for what a municipality must supply if the data is swapped for real records.
 
 ## 0. Global Keys & Conventions
 - Join key everywhere: `Ward_ID + Date` (`Date` = ISO `YYYY-MM-DD`).
@@ -60,8 +70,8 @@ Source: derived from `Docs/IMPLEMENTATION_PLAN.md §1.11, Phase 1–3` + Develop
 
 ### D7 — Complaints + supply-schedule seeds (Phase 11/12 testing)
 **Fields:** `Complaint_ID, User_ID, Ward_ID, Type, Status (Filed/In-progress/Resolved), Created_At, Updated_At`; `Ward_ID, Scheduled_Supply_Time, Supply_Days`
-**Sources:** generated in-app; keep 20–50 sample rows + type taxonomy (`no-supply, low-pressure, leakage, quality, billing`) in `tests/fixtures/`.
-**Acceptance:** citizen journey testable E2E without manual DB edits.
+**Sources:** generated in-app; keep 20–50 sample rows + type taxonomy (`no-supply, low-pressure, leakage, quality, billing, others`) in `tests/fixtures/`. Note: guests may file without an account, so a complaint can have `user_id = NULL` plus `reporter_name`/`address`/`description`/`photo_path` (migration `c8f2a6b1e4d9`) — any fixture set should cover both shapes.
+**Acceptance:** citizen journey testable E2E without manual DB edits (verified live, including guest + photo round-trip).
 
 ## 3. Explicitly NOT Needed for MVP
 Rainfall/weather, water-quality lab data, LP/MILP solver data, multi-city feeds — Future scope only.

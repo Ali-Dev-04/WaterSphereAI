@@ -9,15 +9,15 @@
 |---|---|
 | **Project Name** | WaterSphere AI — AI-Powered Smart Water Management Platform for Intelligent Water Supply Planning and Leakage Risk Prediction |
 | **Document Purpose** | Complete, phase-wise, dependency-aware implementation roadmap taking the project from its current (documentation/research) stage to a deployable system. Intended to be usable by any developer, AI model, or new team member without access to the original conversation. |
-| **Current Project Status** | **Pre-development / Documentation & Research stage.** No source code, repository, or `docs/` folder currently exists in the project workspace. Only conceptual/architecture documentation and a project overview were found. |
+| **Current Project Status** | **Implemented through Phase 14.** Backend (FastAPI + PostgreSQL, 11 tables), ML pipeline + registry, React dashboard with public landing and guest complaints, GIS, leakage and auth/RBAC all exist and run. 28/28 backend tests and 38/38 live e2e checks pass; CI is green. Remaining: Phase 15 staging deploy, Phase 11 Flutter app, authoritative ward GIS, and the WAR units decision. |
 | **Source Documents Reviewed** | 1. `Project_Overview.md` 2. `WaterSphere_AI_Project_Complete_Development_Context.pdf` (32 sections) 3. `Architecture.jpeg` (11-block system architecture diagram) |
 | **Current Understanding** | See Section 2. |
 | **Confirmed Decisions** | See Section 6 (Technology Stack) — items marked **Confirmed** were explicitly named in source docs. |
 | **Assumptions** | Flagged inline as `Assumption:`. Not treated as confirmed facts. |
 | **Open Questions** | Consolidated in Section 20 ("Open Decisions"). |
-| **Last Updated** | Initial version — created from first review of uploaded documentation. |
+| **Last Updated** | 2026-10-25 — reconciled with the implemented repository. |
 
-> **Note on scope of this review:** No project directory, repository, or `docs/` folder was found in the workspace — only the three files listed above were available for inspection. This plan therefore treats the project as **not yet started from an engineering standpoint** (design/research complete, zero implementation). If a code repository exists elsewhere, it must be provided so this plan can be reconciled with actual implementation status (Section 18 currently reports 0% implemented on that basis).
+> **Note on this plan's status:** this document was originally written when only research/overview material existed. It is kept as the phase-by-phase roadmap and acceptance criteria, **not** as a statement of current progress. For actual status always read `Context.md`; for the implemented architecture read `Architecture.md`. Phases 1–14 are substantially complete as of 2026-10-25 (see §18).
 
 ---
 
@@ -129,24 +129,37 @@ Rainfall/weather integration (explicitly out of current scope per source doc), L
 
 ## 2. Current Status vs. Planned Work
 
+> Reconciled with the repository on **2026-10-25**. Authoritative progress lives in `Context.md`.
+
 ### 2.1 Already Implemented
-**None.** No source code, repository, dataset files, trained models, database schema, API code, frontend code, or mobile app code were found in the reviewed workspace. Only conceptual documentation (overview, development context PDF, architecture diagram) exists.
+- **Data:** `bmc-v1` — BMC Mumbai 24 wards, daily 2023-01-01 → 2025-12-31 (26,304 consumption rows, 7,672 reservoir readings, 7 reservoirs), validated PASS.
+- **ML:** preprocessing, per-ward features with chronological splits, 12 trained models (4 families × 3 horizons) plus naive/seasonal baselines, evaluation report, registry (`manifest.json`/`active.json`), per-horizon selection (1d xgb/HGB, 3d/7d gru).
+- **Database:** 11 tables on PostgreSQL, Alembic migrations (head `c8f2a6b1e4d9`), seeded.
+- **Backend:** 22 API operations — auth/JWT + ward-scoped RBAC, forecast, water stress (WAR), supply plan (rule + optional LP), GIS, leakage risk, maintenance, complaints (signed-in + guest), `/api/meta`, model info, health.
+- **Frontend:** React 18 + Vite dashboard — public landing page, sign-in/registration/guest report, role-aware tabs, light municipal theme, CSV export.
+- **Quality:** `pytest backend/tests` **28/28**, `scripts/e2e_check.py` **38/38**, frontend build PASS, CI green (backend + ml-smoke + frontend).
 
 ### 2.2 Partially Implemented
-**None** — same reason as above.
+- **Deployment:** local Docker + host-direct fallback work; **staging (Phase 15) is not executed** (no Render/Netlify services yet).
+- **GIS:** choropleth and reservoir markers work, but ward polygons are approximate centroid boxes — authoritative municipal GeoJSON is pending.
+- **Security:** JWT/RBAC/upload validation/rate limits implemented; shared rate-limit store, managed backups and production secrets are deploy-time tasks.
+- **UI:** desktop verified end-to-end; mobile-width visual sweep is outstanding.
 
-### 2.3 Planned (this document covers all of it)
-Everything in Sections 7–9 (all 17 phases): data acquisition, preprocessing, feature engineering, model training/evaluation, database, backend/API, water-stress/supply-plan engine, admin dashboard, GIS, citizen app, leakage/wastage module, integration, testing, security hardening, and deployment.
+### 2.3 Planned (remaining scope)
+- **Phase 11 — Flutter citizen app** (deferred by the user): schedule, alerts, complaints, account, FCM.
+- **Phase 15 — staging deploy** + runbook (API, managed Postgres, dashboard, migrations, seed, e2e against staging).
+- **P2/P3 improvements:** observability (Sentry/APM), e2e in CI with ephemeral Postgres, multi-city scoping, accessibility/i18n, authoritative GIS layers.
 
 ### 2.4 Blocked
-- Model training is blocked on dataset acquisition (Phase 1).
-- Supply-plan optimization (if LP/MILP is chosen) is blocked on a `Decision Required` about optimization approach (rule-based vs. LP/MILP) and available compute/solver licensing.
-- Citizen push notifications are blocked on Firebase project setup and mobile app store account access.
+- **Staging deploy** needs hosting accounts, a fresh production `JWT_SECRET`, and a managed Postgres provider.
+- **Citizen push notifications** need a Firebase project + mobile app-store accounts (Phase 11).
+- **WAR availability basis** needs an owner decision: keep absolute bands over gross equal-split storage (current; all wards Safe) or switch to servable-share availability. See `EVALUATION.md §5`.
 
 ### 2.5 Research Required
-- Real/usable dataset identification for population, consumption, and reservoir data (see Phase 1).
-- WAR threshold calibration methodology.
-- Whether Transformer forecasting is justified given likely small ward-level dataset size, or whether it should be deprioritized until data volume supports it (`Architecture Clarification Required`).
+- Municipal sign-off on absolute WAR thresholds (currently configurable, provisional).
+- Whether weather/rainfall should be rescoped as an exogenous demand driver (explicitly out of current scope).
+- Real labeled leakage incidents for supervised classification (today unsupervised `IsolationForest` only).
+- Per-city WAR calibration if the pilot expands beyond Mumbai.
 
 ---
 
@@ -724,24 +737,28 @@ No deadline was provided in any reviewed document. The table below gives **relat
 
 ## 18. Final Quality Check
 
-- [x] Entire relevant `docs/` folder reviewed — **none existed**; all provided files were reviewed.
-- [x] Architecture reviewed (Architecture.jpeg, PDF §5/§26)
+> Reconciled with the repository on **2026-10-25**. The original checklist is kept with
+> its resolved answers; where it once reported an empty workspace, the current state is
+> recorded inline.
+
+- [x] Entire relevant `docs/` folder reviewed — **now exists** (`Docs/`, 15 files); all provided files reviewed.
+- [x] Architecture reviewed (Architecture.jpeg, PDF §5/§26) and implemented (`Docs/Architecture.md`)
 - [x] Research reviewed (PDF full document)
 - [x] Project overview reviewed (Project_Overview.md)
-- [x] Existing source code reviewed where relevant — **none found**
+- [x] Existing source code reviewed — **exists now**: `backend/`, `frontend/`, `scripts/`, `models/`, 11-table DB
 - [x] Requirements identified (Section 1)
 - [x] Requirements mapped to implementation (Section 16)
 - [x] Architecture mapped to implementation (Section 3)
-- [x] Technology stack defined (Section 4)
-- [x] AI/ML pipeline defined (Section 5)
-- [x] Database defined (Phase 6, Section 3)
-- [x] Backend defined (Phase 6)
-- [x] Frontend defined (Phase 9)
-- [x] APIs defined (Section 1.12, Phase 6)
-- [x] Integration defined (Phase 13, Section 9)
-- [x] Testing defined (Section 10)
-- [x] Deployment defined (Section 11)
-- [x] Security considered (Section 1.14, Phase 14)
+- [x] Technology stack defined (Section 4) — implemented (FastAPI, PostgreSQL, React/Vite, plain CSS, TF/Keras)
+- [x] AI/ML pipeline defined (Section 5) — implemented; 12 models trained, registry + per-horizon selection live
+- [x] Database defined (Phase 6, Section 3) — implemented, Alembic head `c8f2a6b1e4d9`
+- [x] Backend defined (Phase 6) — implemented, 22 API operations
+- [x] Frontend defined (Phase 9) — implemented, light municipal theme + public landing
+- [x] APIs defined (Section 1.12, Phase 6) — live OpenAPI at `/openapi.json`
+- [x] Integration defined (Phase 13, Section 9) — 38/38 live e2e checks pass
+- [x] Testing defined (Section 10) — implemented: 28/28 pytest, 38/38 e2e, CI green (no FE unit tests yet)
+- [x] Deployment defined (Section 11) — plan ready; Phase 15 staging not yet executed
+- [x] Security considered (Section 1.14, Phase 14) — implemented: JWT + ward-scoped RBAC, upload validation, rate limits
 - [x] Dependencies identified (Section 9)
 - [x] Risks identified (Section 15)
 - [x] MVP defined (Section 7)
@@ -757,15 +774,18 @@ No deadline was provided in any reviewed document. The table below gives **relat
 
 ## 19. Open Decisions Requiring Human Input
 
-1. **Dataset source** — real municipal/open data vs. synthetic/simulated data; which municipality/city, if real.
-2. **WAR thresholds** — exact numeric boundaries for Safe/Moderate/High-Stress/Shortage.
-3. **Model output structure** — separate model per horizon vs. one multi-output/sequence model per algorithm.
-4. **Transformer inclusion at MVP stage** — keep in initial comparison or defer until data volume justifies it.
-5. **Supply-plan approach** — rule-based only vs. LP/MILP, and if the latter, which solver (PuLP vs. OR-Tools).
-6. **Leakage-risk labels** — do they exist at all, and if not, is unsupervised-only acceptable for the foreseeable future.
-7. **Deep-learning framework** — TensorFlow/Keras (as named in source docs) vs. PyTorch.
-8. **Hosting/DB provider specifics** — exact Render/Netlify tiers, managed Postgres provider.
-9. **Ward-level GIS boundary data source.**
-10. **Project deadline / timeline / team size** — needed to convert Section 13's relative ordering into real dates.
-11. **CI/CD and monitoring tooling choices.**
-12. **Citizen account model** — self-registration vs. municipality-provisioned accounts, OTP/verification needs.
+Resolved decisions are struck through with the outcome; genuinely open items remain plain.
+
+1. ~~**Dataset source**~~ → **BMC Mumbai, 24 wards, daily 2023-01-01 → 2025-12-31** (bmc-v1); synthetic-v1 superseded.
+2. ~~**WAR thresholds**~~ → provisional config: Safe ≥ 1.0, Moderate 0.85–1.0, High 0.70–0.85, Shortage < 0.70 (env-configurable, pending municipal sign-off).
+3. ~~**Model output structure**~~ → separate model per horizon (12 total), selected on validation RMSE.
+4. ~~**Transformer inclusion**~~ → included in the comparison; it lost on 3d/7d, so GRU was selected there.
+5. ~~**Supply-plan approach**~~ → rule-based engine is the default; LP (PuLP/CBC) available via `SUPPLY_OPTIMIZER`.
+6. ~~**Leakage-risk labels**~~ → unsupervised `IsolationForest` only, pending real labels.
+7. ~~**Deep-learning framework**~~ → TensorFlow/Keras (TF-CPU container).
+8. **Hosting/DB provider specifics** — exact Render/Netlify tiers, managed Postgres provider. *(open)*
+9. **Ward-level GIS boundary data source** — approximate polygons ship today. *(open)*
+10. **Project deadline / timeline / team size.** *(open)*
+11. **Monitoring tooling** — CI exists (GitHub Actions, 3 jobs); Sentry/APM undecided. *(partially open)*
+12. ~~**Citizen account model**~~ → open self-registration forced to `citizen`, ward locked at sign-up; admins provisioned. OTP still open.
+13. **WAR availability basis** (clarified 2026-10-25) — `EVALUATION.md §5` and `backend/app/inference.py` show the large WAR values come from dividing each reservoir's gross `available_water_ml` (split equally among its serving wards) by forecast demand (range ≈2.9–4000, median ≈184), so every ward reads Safe. Decision needed: keep absolute bands with that framing, or switch to servable-share/net availability. *(open)*

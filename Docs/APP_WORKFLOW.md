@@ -11,6 +11,11 @@ synthetic/real CSVs ──▶ ML track (scripts/) ──▶ models/*.pkl/*.keras
 data/raw/*.csv ──▶ seed ──▶ Postgres ◀─────────────────────────────────┘         └─▶ Flutter app (Phase 11, pending)
 ```
 
+Requests enter through the **public landing page** (`/`) or the sign-in card. The
+dashboard reads all user-visible configuration (ward count, date window, WAR bands,
+model version) from `GET /api/meta`, so there are no hardcoded UI numbers. Guests can
+file a complaint without an account, which is the only anonymous write path.
+
 ## 1. Prerequisites (install once)
 
 | Tool | Needed for | Check |
@@ -48,22 +53,29 @@ Pydantic v2, JWT (`python-jose`), bcrypt-direct, slowapi (10/min login limit).
 |---|---|---|
 | B1 Start database | `docker compose up -d db` | Postgres on `localhost:5433`, healthy |
 | B2 Build API image | `docker compose build api` | `watersphereai-api` with `backend/requirements.txt` |
-| B3 Migrate | `docker compose run --rm api alembic upgrade head` | 11 tables (`7f11edf3bbf1`) |
+| B3 Migrate | `docker compose run --rm api alembic upgrade head` | 11 tables; head `c8f2a6b1e4d9` (2 migrations: base `7f11edf3bbf1` + guest-complaint columns) |
 | B4 Seed | `docker compose exec api python backend/seed.py` | bmc-v1: 24 wards, 26304 consumption rows, 7672 readings, admin + citizen_w1 |
 | B5 Serve | `docker compose up -d api` | API on `localhost:8000`, xgb loaded at startup, keras lazily |
 | B5b Serve (host-direct, Docker down) | `WS_BASE=$PWD DATABASE_URL=postgresql+psycopg2://<user>@localhost:5432/watersphere PYTHONPATH=$PWD/backend .venv/bin/python -m uvicorn app.main:app --port 8000` | Same API without Docker; `WS_BASE` required (code defaults to `/code`) |
-| B6 Configure | `.env` (from `.env.example`): `JWT_SECRET`, `WAR_SAFE/MODERATE/HIGH`, `SUPPLY_RESERVE_PCT=0.05`, `CORS_ORIGINS` | thresholds/reserve change without code edits |
+| B6 Configure | `.env` (from `.env.example`): `JWT_SECRET`, `WAR_SAFE/MODERATE/HIGH`, `SUPPLY_RESERVE_PCT=0.05`, `CORS_ORIGINS`, optional `MODEL_VERSION` fallback | thresholds/reserve/version change without code edits |
 
-Key endpoints: `/api/auth/*`, `/api/forecast?ward_id&target_date&horizon`,
-`/api/water-stress?ward_id&date`, `/api/supply-plan?date`, `/api/gis?date`,
-`/api/leakage-risk`, `/api/maintenance`, `/api/complaints`, `/api/{population,consumption,reservoir,wards}`.
-Interactive contract: `/openapi.json` (or `/docs` in browser).
+Key endpoints (22 operations total — `/openapi.json` is the contract):
+
+| Area | Endpoints |
+|---|---|
+| Public | `GET /api/health`, `GET /api/meta`, `GET /api/public/wards`, `POST /api/complaints/public` (guest, multipart + photo) |
+| Auth | `POST /api/auth/login` (10/min/IP), `POST /api/auth/register` (citizen only), `GET /api/auth/me` |
+| Reads | `GET /api/{wards,population,consumption,reservoir,forecast,water-stress,supply-plan,gis,leakage-risk,maintenance,model-info}` |
+| Complaints | `GET /api/complaints`, `POST /api/complaints`, `PATCH /api/complaints/{cid}`, `GET /api/complaints/{cid}/photo` (admin only) |
 
 ## 4. Track C — Clients (dashboard now, mobile later)
 
 Dashboard built with: Vite + React 18 + Recharts + axios + Leaflet (`react-leaflet@4`)
-+ plain-CSS design tokens. One global ward/date context drives all tabs; citizens
-see Forecasts / Stress / My Supply / Complaints only.
++ plain-CSS design tokens in a **light municipal theme**. Signed-out users see the
+public landing page; sign-in is a split card with a prominent **"Report a complaint
+without sign-in"** button. One global ward/date context drives all tabs; citizens
+see Forecasts / Stress / My Supply / Complaints only. Admins get an all-wards
+complaints filter + detail modal with photo.
 
 | Step | Command (`frontend/`) | Result |
 |---|---|---|
@@ -77,11 +89,14 @@ Messaging for shortage alerts; APK/internal track for demo.
 
 | Step | Command | Gate |
 |---|---|---|
-| D1 Unit tests | `docker compose exec api bash -c "pip install -q pytest; PYTHONPATH=/code/backend python -m pytest backend/tests -q"` | 16 passed (11 core + 5 LP) |
-| D2 End-to-end + security | `python3 scripts/e2e_check.py` (host, stdlib only) | 31/31: full admin→citizen journey, stress/plan math asserts, auth matrix 401/403/404/409, JWT ≈60min, login 429 |
+| D1 Unit + API tests | `docker compose exec api bash -c "pip install -q pytest httpx2; PYTHONPATH=/code/backend python -m pytest backend/tests -q"` | **28 passed** (stress/plan/LP/leakage/guest-complaint + auth/RBAC) |
+| D2 End-to-end + security | `WS_E2E_BASE=http://localhost:8000 PYTHONPATH=. .venv/bin/python scripts/e2e_check.py` (host, stdlib only; defaults to localhost) | **38/38**: admin→citizen journey, stress/plan math, `/api/meta`, guest complaint round-trip + photo, auth matrix 401/403/404/409, JWT ≈60min, login 429 |
 | D2b Drift guard | `docker compose exec -T api python - < scripts/drift_check.py` | exit 0 healthy / 1 drifted (monthly cron) |
 | D2c Backup | `sh scripts/backup_db.sh [dir]` | pg_dump snapshot under `backups/` |
-| D3 Frontend | `cd frontend && npm run build` + browser click-through | build PASS, zero console errors |
+| D3 Frontend | `cd frontend && npm run build` | build PASS; desktop browser click-through completed 2026-10-25 (landing → guest → admin). Mobile widths still open |
+
+CI (`.github/workflows/ci.yml`) runs D1, an ML smoke check, and D3 on every push.
+E2E is not yet in CI (needs an ephemeral Postgres service).
 
 ## 6. Track E — Real-data swap (friends deliver)
 

@@ -28,8 +28,15 @@ everywhere in the UI.
 
 ## 1. Act 1 — The planner's morning (admin, ~8 min)
 
-Sign in as `admin`. Point out the masthead: ward selector, date
-(default 2025-12-20), `bmc-v1` chip, role chip.
+**Start signed out.** The dashboard opens on the **public landing page** (not the
+login form): "Plan the city's water before it runs short.", the Forecast → Stress →
+Plan strip, four stat chips fed by `/api/meta` (24 wards, dataset window, model
+`bmc-v1`, WAR bands), and two CTAs. Say: *"Officers sign in; a citizen who just
+wants to report a leak doesn't need an account."*
+
+Click **Sign in**, use `admin`. Point out the masthead: government strip, ward
+selector, date (default `2025-12-31`, i.e. the last day of the dataset — the bounds
+come from `/api/meta`, not from code), `bmc-v1` chip, role chip.
 
 **Forecasts tab.** Three cards: 1-day (xgboost), 3-day (gru), 7-day (gru),
 each with test accuracy (MAPE ≈ 3.2–3.4%, R² ≥ 0.990). Below: 45-day actual
@@ -68,16 +75,31 @@ IsolationForest screen (unsupervised — say so explicitly), plus the BMC
 maintenance register (123 incidents). Supervised classification is listed as
 future work pending labeled data — good faculty honesty point.
 
-**Complaints tab.** File a `low-pressure` complaint for Ward C as admin.
+**Complaints tab.** File a `low-pressure` complaint for Ward C as admin. Point at
+the admin extras: **"All wards" filter with per-ward counts**, and the **detail
+modal** (reporter, ward, type, status, filed time, address, description, photo).
 
 ## 3. Act 3 — The citizen loop (~5 min, the closer)
 
-Sign out → **"Create a citizen account"** → register (pick Ward M/E) → auto
-sign-in. Show: no ward selector (locked chip), **My Supply** shows only M/E,
-requesting another ward's data returns 403 (say it — then optionally prove it
-via `/docs`). File a complaint as the new citizen. Sign back in as `admin`:
-the complaint is there — **Start work → Resolve**. *"Full loop: forecast →
-stress → plan → citizen alert → complaint → resolution, all role-scoped."*
+**3a. Guest report (no account).** Sign out → you're back on the landing page.
+Click **"Report a water issue without sign-in."** Fill it in live: full name,
+incident ward (from live DB wards), address, incident type — choose **`others`** to
+show the inline hint and the taller description prompt — a **mandatory photo**
+(JPEG/PNG/WEBP ≤ 5 MB; say that the server sniffs magic bytes, not the filename),
+and a description. Submit. Point at the success screen: **a reference number
+(`#id`), ward, type and timestamp** — *"that's the whole citizen identity: no
+account, no password, no PII beyond what they chose to give."*
+
+**3b. Signed-in citizen.** Sign in page → **"Create a citizen account"** → register
+(pick Ward M/E) → auto sign-in. Show: no ward selector (locked chip), **My Supply**
+shows only M/E, requesting another ward's data returns 403 (say it — then
+optionally prove it via `/docs`). File a complaint as the new citizen.
+
+**3c. Close the loop.** Sign back in as `admin`, open Complaints: both the guest
+report and the citizen complaint are there. Filter by the guest's ward to show it
+appears, open **View** to show the photo, then **Start work → Resolve**.
+*"Full loop: forecast → stress → plan → citizen/guest report → resolution, all
+role-scoped."*
 
 ## 4. Behind the scenes (if faculty asks)
 
@@ -85,11 +107,12 @@ stress → plan → citizen alert → complaint → resolution, all role-scoped.
   baselines. GRU won 3d/7d, xgboost won 1d. Transformer was worst on 3d/7d —
   evidence that attention is unjustified at this data scale.
 - **Registry:** `models/manifest.json` — SHA-pinned production artifacts.
-- **Verification:** `pytest backend/tests` (16/16) + `python3 scripts/e2e_check.py`
-  (31/31: math asserts, conservation, auth matrix 401/403/404/409, JWT ≈60min,
-  login throttling).
-- **Design:** Stitch project "WaterSphere AI BMC Operations Dashboard"
-  (10 screens) + `Docs/stitch-screens/*.html` reference for the React port.
+- **Verification:** `pytest backend/tests` (**28/28**) + `python3 scripts/e2e_check.py`
+  (**38/38**: math asserts, conservation, auth matrix 401/403/404/409, JWT ≈60min,
+  login throttling, guest complaint round-trip with photo, `/api/meta`).
+- **Design:** light municipal/utility theme in plain CSS (no glows/gradients/blur).
+  Stitch project "WaterSphere AI BMC Operations Dashboard" + `Docs/stitch-screens/*.html`
+  are the historical visual reference; `Docs/Design_System.md` is the current spec.
 - **Docs:** `Docs/EVALUATION.md` (verdict + limits), `Docs/TODO.md` (what's left:
   staging deploy, Flutter app, authoritative GIS).
 
@@ -101,9 +124,17 @@ stress → plan → citizen alert → complaint → resolution, all role-scoped.
   training Mac) — API-compatible, documented, rerunnable natively.
 - *"Can it scale beyond Mumbai?"* → Schema is ward-based; multi-city scoping is
   a listed P2. WAR bands would need per-city calibration.
-- *"Is it secure?"* → JWT + ward-scoped RBAC on every endpoint, admin
-  provisioning only (self-reg forced to citizen), login throttled, no secrets
-  in code. Production still needs a fresh JWT_SECRET + managed DB backups.
+- *"Is it secure?"* → JWT + ward-scoped RBAC on every protected endpoint, login
+  throttled (10/min/IP), one anonymous write path (guest complaints, 5/min/IP) with
+  magic-byte-checked ≤5 MB photos and admin-only photo access, no secrets in code.
+  Production still needs a fresh JWT_SECRET, managed DB backups, and a shared
+  (Redis) rate-limit store.
+- *"Those WAR numbers look wrong"* → Explained in `Docs/EVALUATION.md §5`, not a bug:
+  availability is each reservoir's **gross `available_water_ml`, split equally among
+  its serving wards**, so WAR runs ~2.9–4000 (median ~184) and every ward classifies
+  Safe. Daily yield (4273 MLD vs ≈3300 ML demand) confirms a structural surplus in
+  this window. The engine itself is proven by the canonical 500/450 → 0.90 test.
+  Open decision: keep absolute bands or switch to servable-share availability.
 
 ## 6. Troubleshooting during demo
 

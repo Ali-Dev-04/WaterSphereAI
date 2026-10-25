@@ -54,7 +54,7 @@ graph LR
     end
 ```
 
-- **Backend:** FastAPI, SQLAlchemy 2 + Alembic (11 tables), Pydantic v2, python-jose JWT, bcrypt, slowapi rate limits. Serves: `/auth`, `/forecast`, `/water-stress`, `/supply-plan`, `/gis`, `/leakage-risk`, `/maintenance`, `/complaints` (incl. the public guest report endpoint and admin-only photo fetch), `/model-info`, `/public/wards` — OpenAPI at `/docs`.
+- **Backend:** FastAPI, SQLAlchemy 2 + Alembic (11 tables, head `c8f2a6b1e4d9`), Pydantic v2, python-jose JWT, bcrypt, slowapi rate limits. Serves 22 operations: `/api/auth/*`, `/api/forecast`, `/api/water-stress`, `/api/supply-plan`, `/api/gis`, `/api/leakage-risk`, `/api/maintenance`, `/api/complaints` (incl. the public guest report endpoint and admin-only photo fetch), `/api/model-info`, `/api/wards`, `/api/public/wards`, `/api/meta`, `/api/health` — OpenAPI at `/docs`.
 - **Frontend:** React 18 + Vite, Recharts, Leaflet, plain-CSS design tokens in a light municipal/utility theme, public landing entry screen, role-aware tabs, CSV export of the supply plan.
 - **ML:** scikit-learn (HGB), TensorFlow/Keras (LSTM/GRU/Transformer), chronological splits *only* (no shuffle), features = population × demand lags/rolls × reservoir availability × calendar/seasonality.
 
@@ -103,12 +103,12 @@ WaterSphere_BMC_Mumbai_D1_D7/   original D1–D7 source dataset
 Docs/           PRD, architecture, evaluation report, workflows, design system
 ```
 
-The full ML pipeline is reproducible: `validate_data.py → preprocess.py → features.py → train.py → evaluate.py` (writes `models/active.json` + test metrics). `e2e_check.py` runs the 31-case black-box verification; `pytest backend/tests` covers stress math and allocator units.
+The full ML pipeline is reproducible: `validate_data.py → preprocess.py → features.py → train.py → evaluate.py` (writes `models/active.json` + test metrics). `e2e_check.py` runs the **38-check** black-box verification; `pytest backend/tests` covers stress math, allocator/LP units, leakage, and guest complaints (**28 tests**).
 
 ## Documentation
 
 - [`Docs/PRD.md`](Docs/PRD.md) — product scope & requirements
-- [`Docs/ARCHITECTURE.md`](Docs/Architecture.md) — system view
+- [`Docs/Architecture.md`](Docs/Architecture.md) — system view
 - [`Docs/EVALUATION.md`](Docs/EVALUATION.md) — model comparison & WAR calibration
 - [`Docs/APP_WORKFLOW.md`](Docs/APP_WORKFLOW.md) — command reference (tracks B: platform)
 - [`Docs/Context.md`](Docs/Context.md) — living project log
@@ -121,9 +121,9 @@ Secrets come from environment only (`.env` / compose env — `JWT_SECRET`, DB UR
 ## Status & roadmap
 
 - ✅ dataset (bmc-v1) → features → 12-model training → evaluation → registry
-- ✅ backend MVP + stress engine + supply planner (+ LP option) + GIS + leakage + complaints
-- ✅ dashboard (role-aware, themed, exportable) · CI green · 31/31 e2e, 16/16 unit
-- ⏳ staging deploy (Render + Netlify), Flutter citizen app
+- ✅ backend MVP + stress engine + supply planner (+ LP option) + GIS + leakage + complaints (signed-in **and** guest, with photo)
+- ✅ public landing page + light municipal dashboard (role-aware, metadata-driven, exportable) · CI green · **38/38 e2e, 28/28 unit**
+- ⏳ staging deploy (Render + Netlify), Flutter citizen app, authoritative ward GIS
 
 ## Report
 
