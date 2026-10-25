@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import api from "../api.js";
 import { CardSkeleton, StatusPill } from "../App.jsx";
 
-const TYPES = ["no-supply", "low-pressure", "leakage", "quality", "billing"];
+const TYPES = ["no-supply", "low-pressure", "leakage", "quality", "billing", "others"];
 
 function Modal({ title, onClose, children }) {
   return (

@@ -25,6 +25,8 @@ class Settings(BaseSettings):
 
     # Guest complaint photo uploads (relative to working dir: repo/host, /code in container).
     upload_dir: str = "uploads"
+    # Public model/version chip (registry manifest overrides at runtime).
+    model_version: str = "bmc-v1"
 
 
 settings = Settings()

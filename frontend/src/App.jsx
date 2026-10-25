@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "./api.js";
+import Landing from "./Landing.jsx";
+import { LogoMark } from "./LogoMark.jsx";
 import Complaints from "./tabs/Complaints.jsx";
 import Forecasts from "./tabs/Forecasts.jsx";
 import GisMap from "./tabs/GisMap.jsx";
@@ -23,7 +25,20 @@ const CITIZEN_TABS = [
   ["supply", "My Supply"],
   ["complaints", "Complaints"],
 ];
-const DEFAULT_DATE = "2025-12-20";
+
+/** Public display config from the API — no user-visible constants live here. */
+export function useMeta() {
+  const [meta, setMeta] = useState(null);
+  useEffect(() => {
+    api.get("/api/meta")
+      .then((r) => setMeta(r.data))
+      .catch(() => setMeta({ // graceful fallback so the app still boots
+        model_version: null, ward_count: null, war: null,
+        window: { min_date: null, max_date: new Date().toISOString().slice(0, 10) },
+      }));
+  }, []);
+  return meta;
+}
 
 export function badgeClass(category) {
   if (category === "Safe") return "safe";
@@ -79,21 +94,7 @@ export function ChartSkeleton() {
   );
 }
 
-export function LogoMark({ size = 30 }) {
-  // WaterSphere mark: ward-network nodes joined by flow arcs inside a droplet
-  // outline — one badge for header, login, and future mobile use.
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#082c47" stroke="#7dd3fc" strokeOpacity="0.45" />
-      <path d="M16 5.5c3.4 4.1 6.5 7.6 6.5 11.4a6.5 6.5 0 1 1-13 0C9.5 13.1 12.6 9.6 16 5.5z"
-        stroke="#7dd3fc" strokeWidth="1.8" strokeLinejoin="round" />
-      <circle cx="13" cy="17.5" r="1.5" fill="#7dd3fc" />
-      <circle cx="19" cy="17.5" r="1.5" fill="#7dd3fc" />
-      <circle cx="16" cy="21" r="1.5" fill="#ffffff" />
-      <path d="M13 17.5h6M16 17.5v3.5" stroke="#082c47" strokeWidth="0.9" />
-    </svg>
-  );
-}
+export { LogoMark };
 
 export function GovBar() {
   const [online, setOnline] = useState(null);
@@ -117,12 +118,11 @@ export function GovBar() {
       ) : (
         <span className="error" style={{ margin: 0, padding: "2px 10px" }}>API Unreachable</span>
       )}
-      <span className="mono">PILOT-PROD</span>
     </div>
   );
 }
 
-const TYPES = ["no-supply", "low-pressure", "leakage", "quality", "billing"];
+const TYPES = ["no-supply", "low-pressure", "leakage", "quality", "billing", "others"];
 
 function GuestComplaint({ onBack }) {
   const [pubWards, setPubWards] = useState([]);
@@ -148,6 +148,9 @@ function GuestComplaint({ onBack }) {
     if (addr.trim().length < 5) return "Please describe the incident address (min 5 characters).";
     if (!photo) return "An incident photo is required (JPEG, PNG or WEBP up to 5 MB).";
     if (photo && photo.size > 5 * 1024 * 1024) return "Photo is larger than 5 MB.";
+    if (type === "others" && desc.trim().length < 25) {
+      return "For type “Others”, please explain the incident in detail in the description (min 25 characters).";
+    }
     if (desc.trim().length < 10) return "Please describe the incident (min 10 characters).";
     return "";
   }
@@ -200,25 +203,35 @@ function GuestComplaint({ onBack }) {
         <select value={type} onChange={(e) => setType(e.target.value)}>
           {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
         </select></div>
+      {type === "others" && (
+        <p className="hint">
+          You selected <b>Others</b> — since the incident type isn’t in the list, describe exactly
+          what happened in the description field below (e.g. “overflowing valve chamber near the
+          school gate since Monday”).
+        </p>
+      )}
       <div className="field"><label>Incident photo (required · JPEG/PNG/WEBP ≤ 5 MB)</label>
         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
         {photo && <span className="muted"> {photo.name}</span>}</div>
       <div className="field"><label>Incident description (required)</label>
-        <textarea rows={4} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What happened, when it started, severity, how many households are affected…" /></div>
+        <textarea rows={4} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder={type === "others"
+          ? "Describe the incident in detail — what happened, when it started, severity, what makes it different from the listed types…"
+          : "What happened, when it started, severity, how many households are affected…"} /></div>
       {error && <div className="error">{error}</div>}
       <button className="primary" type="submit" disabled={busy}>{busy ? "Submitting…" : "Submit complaint →"}</button>
     </form>
   );
 }
 
-function Login({ onLogin }) {
-  const [mode, setMode] = useState("signin");
+function Login({ onLogin, initialMode = "signin", onHome, meta }) {
+  const [mode, setMode] = useState(initialMode);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [regWard, setRegWard] = useState("");
   const [pubWards, setPubWards] = useState([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  useEffect(() => { setMode(initialMode); }, [initialMode]);
   useEffect(() => {
     if (mode === "register" && !pubWards.length) {
       api.get("/api/public/wards").then((r) => {
@@ -271,17 +284,17 @@ function Login({ onLogin }) {
               <div className="div">MCGM Water Operations Division</div>
             </div>
           </div>
-          <h2>Ward-level demand forecasts and reservoir-aware supply planning for 24 BMC wards.</h2>
-          <p className="desc">Operational hydraulic intelligence across 7 municipal source catchments with multi-horizon demand estimation.</p>
+          <h2>Ward-level demand forecasts and reservoir-aware supply planning{meta && meta.ward_count ? ` for ${meta.ward_count} BMC wards` : ""}.</h2>
+          <p className="desc">Operational hydraulic intelligence across the city’s reservoir network with multi-horizon demand estimation.</p>
           <ul className="caplist">
-            <li><span className="capicon">▤</span><div><b>1 / 3 / 7-day ward demand forecasts</b><span>Calibrated on 2023–2025 ward telemetry, served per-horizon.</span></div></li>
-            <li><span className="capicon">◉</span><div><b>Water-stress classification (WAR)</b><span>Safe ≥ 1.00 · Moderate 0.85–1.00 · High 0.70–0.85 · Shortage &lt; 0.70.</span></div></li>
-            <li><span className="capicon">⬢</span><div><b>Zone-wise supply plans + alerts</b><span>Severity-weighted allocation from 7 live reservoir pools.</span></div></li>
+            <li><span className="capicon">▤</span><div><b>1 / 3 / 7-day ward demand forecasts</b><span>{meta?.window?.min_date && meta?.window?.max_date ? `Calibrated on ${meta.window.min_date.slice(0, 4)}–${meta.window.max_date.slice(0, 4)} ward telemetry, served per-horizon.` : "Calibrated on recorded ward telemetry, served per-horizon."}</span></div></li>
+            <li><span className="capicon">◉</span><div><b>Water-stress classification (WAR)</b><span>{meta?.war ? `Safe ≥ ${meta.war.safe} · Moderate ${meta.war.moderate}–${meta.war.safe} · High ${meta.war.high}–${meta.war.moderate} · Shortage < ${meta.war.high}.` : "Classified by the water-availability ratio."}</span></div></li>
+            <li><span className="capicon">⬢</span><div><b>Zone-wise supply plans + alerts</b><span>Severity-weighted allocation from the municipality’s reservoir pools.</span></div></li>
           </ul>
-          <div className="meta"><span className="verchip">bmc-v1</span><span className="muted" style={{ color: "#9bb3c7" }}>Official use only</span></div>
+          <div className="meta">{meta?.model_version && <span className="verchip">{meta.model_version}</span>}<span className="muted" style={{ color: "var(--ws-deep-ink)" }}>Official use only</span></div>
         </div>
         <div className="login-form">
-          <h2>{mode === "signin" ? <>Municipal sign-in <span className="sso">SCADA SSO v2</span></>
+          <h2>{mode === "signin" ? "Municipal sign-in"
             : mode === "register" ? "Citizen registration" : "Report a water issue — no account"}</h2>
           <p className="muted">{mode === "signin"
             ? "Use your water-board account to continue."
@@ -290,6 +303,7 @@ function Login({ onLogin }) {
               : "Guest reports need no account — a photo is required and your report goes straight to the ward office."}</p>
           {error && <div className="error"><b>{mode === "signin" ? "Authentication notice" : mode === "register" ? "Registration notice" : "Submission notice"}</b><br />{error}</div>}
           {mode === "signin" ? (
+          <>
           <form onSubmit={submit}>
             <div className="field"><label>Officer username / Citizen ID</label>
               <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" placeholder="Enter your username" /></div>
@@ -297,6 +311,11 @@ function Login({ onLogin }) {
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" placeholder="••••••••" /></div>
             <button className="primary" type="submit" disabled={busy}>{busy ? "Signing in…" : "Sign in →"}</button>
           </form>
+          <div className="divider"><span>or</span></div>
+          <button className="secondary" onClick={() => { setError(""); setMode("guest"); }}>
+            Report a complaint without sign-in
+          </button>
+          </>
           ) : mode === "register" ? (
           <form onSubmit={register}>
             <div className="field"><label>Citizen ID</label>
@@ -316,7 +335,7 @@ function Login({ onLogin }) {
             {mode === "signin" ? (
               <>
                 New here? <a href="#register" onClick={(e) => { e.preventDefault(); setError(""); setMode("register"); }}>Create a citizen account</a>
-                {" · "}<a href="#guest" onClick={(e) => { e.preventDefault(); setError(""); setMode("guest"); }}>Report a water issue without sign-in</a>
+                {onHome && <>{" · "}<a href="#home" onClick={(e) => { e.preventDefault(); setMode("signin"); onHome(); }}>Back to home</a></>}
               </>
             ) : (
               <>Have an account? <a href="#signin" onClick={(e) => { e.preventDefault(); setError(""); setMode("signin"); }}>Back to sign-in</a></>
@@ -331,10 +350,13 @@ function Login({ onLogin }) {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [view, setView] = useState("landing"); // signed-out entry: landing → login
+  const [presets, setPresets] = useState({ initialMode: "signin" });
   const [tab, setTab] = useState("forecast");
+  const meta = useMeta();
   const wards = useWards();
   const [ward, setWard] = useState("");
-  const [date, setDate] = useState(DEFAULT_DATE);
+  const [date, setDate] = useState("");
 
   useEffect(() => {
     if (localStorage.getItem("ws_token")) {
@@ -345,11 +367,31 @@ export default function App() {
     if (user?.role === "citizen" && user.ward_id) setWard(user.ward_id);
     else if (!ward && wards.length) setWard(wards[0].ward_id);
   }, [user, wards]);
+  useEffect(() => {
+    if (!date && meta?.window?.max_date) setDate(meta.window.max_date);
+  }, [meta]);
 
-  if (!user) return <Login onLogin={setUser} />;
+  function goToLogin(initialMode) {
+    setPresets({ initialMode });
+    setView("login");
+  }
+
+  if (!user) {
+    return view === "landing"
+      ? <Landing meta={meta}
+          onSignIn={() => goToLogin("signin")}
+          onGuest={() => goToLogin("guest")} />
+      : <Login onLogin={setUser} initialMode={presets.initialMode}
+          onHome={() => setView("landing")} meta={meta} />;
+  }
+
   const tabs = user.role === "admin" ? ADMIN_TABS : CITIZEN_TABS;
   const Tab = { forecast: Forecasts, stress: Stress, supply: Supply, gis: GisMap, leakage: Leakage, reservoirs: Reservoirs, complaints: Complaints }[tab] || Forecasts;
   const ctx = { user, wards, ward, date };
+  const war = meta?.war;
+  const warText = war
+    ? `Safe ≥ ${war.safe} · Moderate ${war.moderate}–${war.safe} · High ${war.high}–${war.moderate} · Shortage < ${war.high}`
+    : "Water-availability ratio bands";
 
   return (
     <>
@@ -357,11 +399,13 @@ export default function App() {
       <div className="topbar">
         <div className="brand"><LogoMark size={30} /><h1>WaterSphere AI</h1></div>
         <span className="tag">pilot</span>
-        <span className="verchip">bmc-v1</span>
+        {meta?.model_version && <span className="verchip">{meta.model_version}</span>}
         <span className="spacer" />
-        <span className="rolechip">{user.role === "admin" ? "Admin · all 24 wards" : `Citizen · ${user.ward_id}`}</span>
+        <span className="rolechip">{user.role === "admin"
+          ? (meta?.ward_count ? `Admin · all ${meta.ward_count} wards` : "Admin")
+          : `Citizen · ${user.ward_id}`}</span>
         <span className="who">{user.username}</span>
-        <button className="ghost" onClick={() => { localStorage.removeItem("ws_token"); setUser(null); }}>Sign out</button>
+        <button className="ghost" onClick={() => { localStorage.removeItem("ws_token"); setUser(null); setView("landing"); }}>Sign out</button>
       </div>
       <div className="contextbar">
         {user.role === "admin" ? (
@@ -373,8 +417,11 @@ export default function App() {
           <span className="ward-chip">{ward || user.ward_id}</span>
         )}
         <div className="field"><label>Date</label>
-          <input type="date" value={date} min="2024-02-01" max="2025-12-31" onChange={(e) => setDate(e.target.value)} /></div>
-        <span className="verchip">bmc-v1 · live API</span>
+          <input type="date" value={date}
+            {...(meta?.window?.min_date ? { min: meta.window.min_date } : {})}
+            {...(meta?.window?.max_date ? { max: meta.window.max_date } : {})}
+            onChange={(e) => setDate(e.target.value)} /></div>
+        <span className="verchip" title={warText}>{meta?.model_version ? `${meta.model_version} · live API` : "live API"}</span>
       </div>
       <div className="nav" role="tablist">
         {tabs.map(([k, label]) => (

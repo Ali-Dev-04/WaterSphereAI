@@ -6,10 +6,12 @@ import os
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app import models
 from app.auth import get_current_user, ward_scope
+from app.config import settings
 from app.database import get_db
 
 router = APIRouter(tags=["data"])
@@ -89,6 +91,34 @@ def public_wards(db: Session = Depends(get_db)):
 MODELS_DIR = Path(os.environ.get("WS_BASE", "/code")) / "models"
 
 
+def _registry_version() -> str:
+    """Model version from the registry manifest; config fallback if artifacts absent."""
+    try:
+        return json.loads((MODELS_DIR / "manifest.json").read_text())["model_version"]
+    except Exception:
+        return settings.model_version
+
+
+@router.get("/api/meta")
+def meta(db: Session = Depends(get_db)):
+    """Public display configuration — drives UI copy so nothing is hardcoded.
+
+    Deliberately exposes only non-sensitive values: ward count, dataset window,
+    WAR bands and the model version. No credentials, paths or internals.
+    """
+    dmin, dmax = db.query(func.min(models.Consumption.date),
+                          func.max(models.Consumption.date)).one()
+    return {
+        "model_version": _registry_version(),
+        "ward_count": db.query(models.Ward).count(),
+        "window": {"min_date": (dmin or dt.date.today()).isoformat(),
+                   "max_date": (dmax or dt.date.today()).isoformat()},
+        "war": {"safe": settings.war_safe,
+                "moderate": settings.war_moderate,
+                "high": settings.war_high},
+    }
+
+
 @router.get("/api/model-info")
 def model_info(user=Depends(get_current_user)):
     """Active model per horizon + its held-out test scores (from the registry).
@@ -98,7 +128,7 @@ def model_info(user=Depends(get_current_user)):
     """
     _ = user
     active = json.loads((MODELS_DIR / "active.json").read_text())
-    return {"model_version": "bmc-v1",
+    return {"model_version": _registry_version(),
             "selected_on": active["selected_on"],
             "active_per_horizon": active["best_per_horizon"],
             "test_scores": active["test_scores_of_selected"]}

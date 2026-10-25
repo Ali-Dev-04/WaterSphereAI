@@ -177,6 +177,10 @@ def main() -> None:
     check("guest unknown ward 404", code == 404, f"got {code}")
 
     # ---------- J4: supporting endpoints ----------
+    code, meta = call("GET", "/api/meta", None)  # public display config
+    check("GET /api/meta 200 (public)", code == 200 and meta["ward_count"] == N_WARDS
+          and meta["window"]["min_date"] <= meta["window"]["max_date"]
+          and {"safe", "moderate", "high"} <= set(meta["war"]), f"got {code}")
     for path, q in [("/api/leakage-risk", {"ward_id": WARD_A, "date_from": "2025-11-01", "date_to": TEST_DATE}),
                     ("/api/gis", {"date": TEST_DATE}),
                     ("/api/maintenance", {"ward_id": WARD_A}),

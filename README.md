@@ -21,7 +21,7 @@ Municipal demand varies by ward, but supply is usually scheduled manually — ca
 | **Supply planning** | Severity-weighted, forecast-capped allocator with redistribution and a 5% reserve — rule engine by default, optional exact LP solver (`planner_lp.py`, PuLP/CBC) via `SUPPLY_OPTIMIZER=lp` |
 | **GIS map** | Ward polygons + reservoir markers, stress choropleth and 1-day forecast hover (Leaflet/OSM) |
 | **Leakage indicators** | Loss = supplied − consumed per ward, IsolationForest anomaly flags, maintenance register |
-| **Citizens** | Self-signup (ward-scoped read access), complaints filing + status tracking, and **guest reporting — "Report a water issue without sign-in"** on the login page (name, ward from live data, mandatory address & description, mandatory incident photo; returns a reference number) |
+| **Citizens** | Self-signup (ward-scoped read access), complaints filing + status tracking, and **guest reporting — "Report a water issue without sign-in"** (prominent login-page button; name, ward from live data, mandatory address & description, mandatory incident photo; `others` type for anything not listed; returns a reference number) |
 | **Auth & roles** | JWT + RBAC; admins see all wards, citizens only their own. Login rate-limited |
 
 ## Live metrics (bmc-v1, held-out test set — touched once)
@@ -55,7 +55,7 @@ graph LR
 ```
 
 - **Backend:** FastAPI, SQLAlchemy 2 + Alembic (11 tables), Pydantic v2, python-jose JWT, bcrypt, slowapi rate limits. Serves: `/auth`, `/forecast`, `/water-stress`, `/supply-plan`, `/gis`, `/leakage-risk`, `/maintenance`, `/complaints` (incl. the public guest report endpoint and admin-only photo fetch), `/model-info`, `/public/wards` — OpenAPI at `/docs`.
-- **Frontend:** React 18 + Vite, Recharts, Leaflet, plain-CSS design tokens, role-aware tabs, CSV export of the supply plan.
+- **Frontend:** React 18 + Vite, Recharts, Leaflet, plain-CSS design tokens in a light municipal/utility theme, public landing entry screen, role-aware tabs, CSV export of the supply plan.
 - **ML:** scikit-learn (HGB), TensorFlow/Keras (LSTM/GRU/Transformer), chronological splits *only* (no shuffle), features = population × demand lags/rolls × reservoir availability × calendar/seasonality.
 
 ## Quickstart
